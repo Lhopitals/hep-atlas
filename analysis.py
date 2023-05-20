@@ -111,6 +111,7 @@ def efficiency(df, df_cut):
         efficiencies.update({variable: df_cut[variable].size/df[variable].size})    #hay que hacerlo con la señal solamente
     return efficiencies
 #background rejection 1 - eff 
+#hola po
 
 
 
