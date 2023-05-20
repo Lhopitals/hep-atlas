@@ -9,7 +9,7 @@ from tqdm import tqdm # sirve para ver la linea de carga al cargar los archivos
 # import awkward as ak
 # import vector
 
-path = '/home/gabbo/hep-atlas/data/' # moverlo a main
+path = '/home/gabbo/hep-atlas/data/'
 
 ################################################################
 ####################### LEER Y CORTAR DATOS ####################
