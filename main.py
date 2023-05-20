@@ -25,3 +25,5 @@ if __name__ == '__main__':
 
     diccionario = do_cuts_efficiency(list_all_df, cuts)
     print(diccionario)
+    
+    
