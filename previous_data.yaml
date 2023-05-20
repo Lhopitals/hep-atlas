@@ -1,0 +1,112 @@
+datasets:
+  VBF_500757: signal/frvz_vbf_500757.root
+  # VBF_500758: signal/frvz_vbf_500758.root
+  # VBF_500759: signal/frvz_vbf_500759.root
+  # VBF_500760: signal/frvz_vbf_500760.root
+  # VBF_500761: signal/frvz_vbf_500761.root
+  # VBF_500762: signal/frvz_vbf_500762.root
+  # VBF_500763: signal/frvz_vbf_500763.root
+  # VBF_500764: signal/frvz_vbf_500764.root
+  QCD: background/qcd.root
+  TOP: background/top.root
+  Wjets: background/wjets_strong_sh227.root
+  #Wjj: background/wjets_ewk.root
+  Zjets: background/zjets_strong_sh227.root
+  Zjj: background/zjets_ewk.root
+  #diboson: ../../samples/DPJ/v02-00/abcd-samples-newdef/diboson.root
+
+recover_branches:
+  - njet30  
+  - mjj                                 
+  - detajj
+  - dphijj
+  - min_dphi_jetmet
+  - LJjet1_gapRatio
+  - LJjet1_BIBtagger
+  - MET
+  - neleSignal
+  - nmuSignal
+  - metTrig
+  - scale1fb
+  - intLumi
+  - hasBjet
+  - nLJmus20
+  - LJjet1_timing
+  - LJjet1_DPJtagger
+  - LJjet1_jvt
+  - nLJjets20
+  - jet1_pt
+
+detector_consts :
+  mevGev: 1000  
+  lum: 140 # Luminosity @ LHC Run-2 (fb-1)
+
+
+cuts:
+  # nLJjets20: [1, .inf]            #min      
+  MET: [225000, .inf]           #min
+  # njet30: [1, .inf]           #min
+  mjj: [1000000, .inf]            #min
+  # detajj: [3, .inf]           #min
+  # jet1_pt: [90000, .inf]            #min
+  # LJjet1_gapRatio: [0.9, .inf]            #min
+  # LJjet1_BIBtagger: [0.2, .inf]           #min
+  # LJjet1_jvt: [-.inf, 0.4]          #max
+  # LJjet1_DPJtagger: [0.5 , 0.95]    #min max
+  dphijj: [-.inf, 2.5]              #max
+
+  # LJjet1_timing: [-.inf, 4]           #max
+  
+  
+  # NOS QUEDAMOS SIN DATOS  
+  #nmuSignal: [0, .inf]            #min
+  #nLJmus20: [0, .inf]           #min
+  #neleSignal: [0 , .inf]            #min
+
+
+  # NO EXISTEN / NO SABEMOS COMO INTERPRETARLO / NO SABEMOS SI ES CORTE MAYOR O MENOR
+  #nLJmu20: [0, .inf]           #min
+  #dphijetmet: [0.4, .inf]            #min
+  # LJ1_index: [-.inf, 0]
+  #caloDPJ: [2, .inf]
+  #muDPJ: [0,.inf]
+  #LJjet1_isoID: [-.inf, 2000]
+
+# scale_file:
+#   VBF_500757: 0.001
+#   VBF_500758: 
+#   VBF_500759: 
+#   VBF_500760: 
+#   VBF_500761: 
+#   VBF_500762: 
+#   VBF_500763: 
+#   VBF_500764: 
+#   QCD: 
+#   TOP: 
+#   Wjets: 
+#   #Wjj: 
+#   Zjets: 
+#   Zjj: 
+#   # diboson: 
+
+scale_variable:
+  njet30: 0.001  
+  mjj: 0.001 
+  detajj: 0.001 
+  dphijj: 0.001 
+  min_dphi_jetmet: 0.001 
+  LJjet1_gapRatio: 0.001 
+  LJjet1_BIBtagger: 0.001 
+  MET: 0.001 
+  neleSignal: 0.001 
+  nmuSignal: 0.001 
+  metTrig: 0.001
+  scale1fb: 0.001
+  intLumi: 0.001
+  hasBjet: 0.001
+  nLJmus20: 0.001
+  LJjet1_timing: 0.001
+  LJjet1_DPJtagger: 0.001
+  LJjet1_jvt: 0.001
+  nLJjets20: 0.001
+  jet1_pt: 0.001 
