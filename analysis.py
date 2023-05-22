@@ -36,7 +36,9 @@ def read_datasets(datasets, variables, scale, path):
         df_data = scale_df(df_data, scale)
 
         # guardo el nombre del dataset 
-
+        nombre = data.split('.', 1)[0] # elimino lo de despues del punto
+        nombre = nombre.split('/', 1)[1] # elimino lo de antes del punto
+        df_data.columns.name = nombre # le doy el nombre al dataframe
 
         list_all_df.append(df_data)
     return list_all_df
@@ -129,6 +131,7 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
     """
     n_cuts = 100 # numero_iteraciones_cortes
     valores_eficiencias_variable = []
+    valores_cortes = []
 
     # elimino los valores extremos 
     low_data = signal[variable].quantile(0.01)
@@ -161,8 +164,9 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
         significancia_i = significance(signal, backgrounds_with_cuts)
 
         valores_eficiencias_variable.append(significancia_i)
+        valores_cortes.append(iteration_cut)
         
-    return valores_eficiencias_variable
+    return valores_cortes, valores_eficiencias_variable
 
 
 
@@ -179,31 +183,39 @@ def graficar(signal, backgrounds, significance, variable):
     plt.style.use('classic')
     fig, axes = plt.subplots(2,1, figsize=(10,12), gridspec_kw={'height_ratios': [2, 1]})
     
+    # calculo la significancia 
+    cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
+
     #Scatter de la significancia.
-    scatter = sns.scatterplot(ax = axes[1], data=significance, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
+    scatter = sns.scatterplot(ax = axes[1], x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
     scatter.set_xlabel(variable, fontdict={'size':12})
     scatter.set_ylabel('Significance', fontdict={'size':12})
 
     # obtengo solo la variable que me interesa de los backgrounds
     list_backgrounds_variable = []
-    keys=['a', 'b', 'c', 'd', 'e', 'f', 'g']
-    for background, key in zip(backgrounds, keys):
+    keys=[]
+    for background in backgrounds:
         variable_background = background[variable]
 
         # elimino los valores muy grandes
         low_data = variable_background.quantile(0.01)
-        high_data  = variable_background.quantile(0.99)
+        high_data  = variable_background.quantile(0.98)
         variable_background = variable_background[(variable_background>low_data) & (variable_background<high_data)]
 
-        variable_background = variable_background.rename(key)
+        # guardo los datos de la variable del background
         list_backgrounds_variable.append(variable_background)
+
+        # guardo el nombre del background
+        keys.append(background.columns.name)
+
+    # guardo todos los datos de la variable en una sola columna, pero con diferente indice
     backgrounds_variable = pd.concat(list_backgrounds_variable, axis=0, keys=keys, names=["simulation", "ID"])
     backgrounds_variable = pd.DataFrame(backgrounds_variable, columns=[variable])
-    print(backgrounds_variable)
+    # print(backgrounds_variable)
 
     # elimino los datos muy extremos de signal
     low_data = signal[variable].quantile(0.01)
-    high_data  = signal[variable].quantile(0.99)
+    high_data  = signal[variable].quantile(0.98)
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
 
 
