@@ -6,6 +6,8 @@ import uproot
 import sys
 import yaml
 from tqdm import tqdm # sirve para ver la linea de carga al cargar los archivos
+import pint
+import seaborn as sns
 # import awkward as ak
 # import vector
 
@@ -34,6 +36,10 @@ def read_datasets(datasets, variables, scale, path):
         datos = read_root_file(path, data, "miniT")
         df_data = datos.arrays(variables, library="pd")
         df_data = scale_df(df_data, scale)
+
+        # guardo el nombre del dataset 
+
+
         list_all_df.append(df_data)
     return list_all_df
 
@@ -130,7 +136,9 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
     low_data = signal[variable].quantile(0.01)
     high_data  = signal[variable].quantile(0.99)
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
-    background = background[(background[variable]>low_data) & (background[variable]<high_data)]
+
+    for background in backgrounds:
+        background = background[(background[variable]>low_data) & (background[variable]<high_data)]
 
     # de momento solo voy a hacerlo 100 veces para usar la funcion .quantile y no dejar el código engorroso, buscar una funcion mejor!
     for i in range(n_cuts):
@@ -159,7 +167,59 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
     return valores_eficiencias_variable
 
 
+
+################################################################################
+################################# GRAFICAR #####################################
+################################################################################
+
+def graficar(signal, backgrounds, significance, variable):
+    #Uso de Latex en los ejes e instrucciones para graficar.
+    plt.rcParams.update(plt.rcParamsDefault)
+    plt.rcParams['font.size'] = 14
+    plt.rcParams['text.usetex'] = True
+    plt.rcParams['font.family'] = "serif"
+    plt.style.use('classic')
+    fig, axes = plt.subplots(2,1, figsize=(10,12), gridspec_kw={'height_ratios': [2, 1]})
     
+    #Scatter de la significancia.
+    scatter = sns.scatterplot(ax = axes[1], data=significance, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
+    scatter.set_xlabel(variable, fontdict={'size':12})
+    scatter.set_ylabel('Significance', fontdict={'size':12})
+
+    # obtengo solo la variable que me interesa de los backgrounds
+    list_backgrounds_variable = []
+    keys=['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    for background, key in zip(backgrounds, keys):
+        variable_background = background[variable]
+
+        # elimino los valores muy grandes
+        low_data = variable_background.quantile(0.01)
+        high_data  = variable_background.quantile(0.99)
+        variable_background = variable_background[(variable_background>low_data) & (variable_background<high_data)]
+
+        variable_background = variable_background.rename(key)
+        list_backgrounds_variable.append(variable_background)
+    backgrounds_variable = pd.concat(list_backgrounds_variable, axis=0, keys=keys, names=["simulation", "ID"])
+    backgrounds_variable = pd.DataFrame(backgrounds_variable, columns=[variable])
+    print(backgrounds_variable)
+
+    # elimino los datos muy extremos de signal
+    low_data = signal[variable].quantile(0.01)
+    high_data  = signal[variable].quantile(0.99)
+    signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
+
+
+    # se grafican los histoplots
+    bins_fix = (0,20)
+    sns.histplot(ax = axes[0], data=backgrounds_variable,x=variable, alpha=.7, bins=20, hue='simulation')
+    histoplot = sns.histplot(ax = axes[0], data=signal,x=variable, alpha=.7, bins=bins_fix,legend=True)
+    histoplot.set_xlabel(variable, fontdict={'size':12})
+    histoplot.set_ylabel('Events for ' + str(variable) , fontdict={'size':12})
+    histoplot.legend()
+    #plt.savefig('fig_significance.eps', format = 'eps')
+    #plt.savefig('fig_significance.pdf', format = 'pdf')
+    plt.show()
+
 ################################################################################
 ################################ EFICIENCIA ####################################
 ################################################################################

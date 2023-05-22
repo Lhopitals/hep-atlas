@@ -1,3 +1,5 @@
+
+
 from analysis import *
 
 if __name__ == '__main__':
@@ -75,21 +77,13 @@ if __name__ == '__main__':
     print(mi_significancia)
 
     mi_lista_significancias = barrido_significancia_variable(list_cut_df_signals[0], list_cut_df_backgrounds, "MET")
-    #print(mi_lista_significancias)
+    print(mi_lista_significancias)
 
     x = range(len(mi_lista_significancias))
-    signficance = mi_lista_significancias                           #CORREGIR EL GRAFICO DE SIGNIFICANCIA!!!!!!!!!!!!!!!!!!!
+    signficance = mi_lista_significancias
     
-    graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
-    # graficar_test(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
+    # graficar(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'mjj')
+    graficar_test(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
     #graficar(x, y, "Mi gráfico")
     #graficar_test(x, y)
-
-    #print(list_all_df[0].describe())
-    #print(do_cuts(list_all_df, cuts)[0].describe())
-    #diccionario = do_cuts_efficiency(list_all_df, cuts)
-    # print(diccionario)
-
-    # print(list_all_df[1]['intLumi'].unique()) # [44.3  58.45  1.   36.1 ] # [44.3   1.   58.45 36.1 ]
-    
-    
+    # graficar_test(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
