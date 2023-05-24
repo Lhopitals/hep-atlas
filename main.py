@@ -78,9 +78,11 @@ if __name__ == '__main__':
     #print(mi_lista_significancias)
 
     x = range(len(mi_lista_significancias))
-    signficance = mi_lista_significancias                           
+    signficance = mi_lista_significancias      
+    print(list_cut_df_backgrounds)                     
     
-    graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
+    #graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
+    graficar(list_cut_df_signals[0],list_all_background, signficance, 'MET')
     # graficar_test(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
     #graficar(x, y, "Mi gráfico")
     #graficar_test(x, y)
@@ -90,6 +92,6 @@ if __name__ == '__main__':
     #diccionario = do_cuts_efficiency(list_all_df, cuts)
     # print(diccionario)
 
-    # print(list_all_df[1]['intLumi'].unique()) # [44.3  58.45  1.   36.1 ] # [44.3   1.   58.45 36.1 ]
+
     
     

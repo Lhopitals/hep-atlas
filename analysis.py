@@ -11,9 +11,13 @@ import seaborn as sns
 # import awkward as ak
 # import vector
 
+
+
 ################################################################
 ####################### LEER Y CORTAR DATOS ####################
 ################################################################
+
+
 
 # Leer archivos de data_.yaml
 def read_data_yaml(data_yaml_file):
@@ -21,15 +25,28 @@ def read_data_yaml(data_yaml_file):
         data_yaml = yaml.load(f, Loader=yaml.FullLoader)
     return data_yaml
 
+
+
 #Leer archivos root
 def read_root_file(path, filename, tree_name):
     file = uproot.open(path + filename)
     tree = file[tree_name]
     return tree
 
-# crea un dataframe con todos los datos
+
+
+#Se define la función con la que se escalan las variables para transformar unidades.
+def scale_df(df, scale):
+    for variable in scale:
+        df[variable] = df[variable]#*scale[variable]
+    return df
+
+
+
+# crea una lista con todos los datasets introducidos en datasets
 def read_datasets(datasets, variables, scale, path):
     list_all_df = []
+    # se leen los df's introducidos en datasets
     for data in tqdm(datasets): 
         datos = read_root_file(path, data, "miniT")
         df_data = datos.arrays(variables, library="pd")
@@ -40,73 +57,44 @@ def read_datasets(datasets, variables, scale, path):
         nombre = nombre.split('/', 1)[1] # elimino lo de antes del punto
         df_data.columns.name = nombre # le doy el nombre al dataframe
 
+        # se guarda el df en la lista
         list_all_df.append(df_data)
+        
     return list_all_df
 
-#Se define la función con la que se escalan las variables para transformar unidades.
-def scale_df(df, scale):
-    for variable in scale:
-        df[variable] = df[variable]#*scale[variable]
-    return df     #REVISAR TOM
+
 
 #Se le da el corte
+# se realizan los cortes superiores e inferiores a una lista de dataframes
 def do_cuts(old_list_all_df, cuts, scale):
+
+    # lista de df's cortados
     list_df_with_cuts = []
 
+    # se realiza el corte para cada df
     for df in old_list_all_df:
+        # se realiza el corte para cada variable
         for variable in cuts:
+            # se guarda el corte mayor e inferior, el corte debe estar en la misma escala que los datos
             corte_menor = cuts[variable][0]*scale[variable]
             corte_mayor = cuts[variable][1]*scale[variable]
 
+            # se hace el corte mayor e inferior, 
             df = df[df[variable] < corte_mayor]
             df = df[df[variable] > corte_menor]
 
+        # se guardan los df's cortados en una lista
         list_df_with_cuts.append(df)
         
     return list_df_with_cuts
 
-#Se le da el corte eficiente
-def do_cuts_efficiency(old_list_all_df, cuts):
-    efficiency_df = pd.DataFrame()
-    list_df_with_cuts = []
-    lista_eficiencias = []
 
-    for df in old_list_all_df:
-        lista_variables = []
-        lista_valores_corte_mayor = []
-        lista_valores_corte_menor = []
-        lista_eficiencias = []
-
-        old_df = df
-
-        for variable in cuts:
-            corte_menor = cuts[variable][0]
-            corte_mayor = cuts[variable][1]
-            
-            lista_variables.append(variable)
-            lista_valores_corte_mayor.append(corte_mayor)
-            lista_valores_corte_menor.append(corte_menor)
-
-            df = df[df[variable] < corte_mayor]
-            df = df[df[variable] > corte_menor]
-
-            lista_eficiencias.append(df[variable].size/old_df[variable].size)
-
-        list_df_with_cuts.append(df)
-
-        efficiency_df["variable"] = lista_variables
-        efficiency_df["valor_corte_mayor"] = lista_valores_corte_mayor
-        efficiency_df["valor_corte_menor"] = lista_valores_corte_menor
-        efficiency_df["eficiencias"] = lista_eficiencias
-
-        lista_eficiencias.append(efficiency_df)
-        print(efficiency_df)
-
-    return lista_eficiencias
 
 ################################################################################
 ######################### SIGNIFICANCIA Y CORTES ###############################
 ################################################################################
+
+
 
 # SIGNIFICANCE DEFINITION
 def significance(signal, backgrounds):
@@ -114,12 +102,18 @@ def significance(signal, backgrounds):
     signal es un dataframe 
     background es una lista de df
     """
+    # se calcula la significancia con la variable "intlumi"
     signal_weight = signal["intLumi"].sum()
+
+    # se calcula el peso de todos los background
     backgrounds_weight = 0
     for df in backgrounds:
         background_weight = df["intLumi"].sum()
         backgrounds_weight += background_weight 
+    
+    # se calcula la significancia con la fórmula proporcionada
     return np.sqrt(2 * abs( (signal_weight + backgrounds_weight) * np.log(1 + (signal_weight/backgrounds_weight)) - signal_weight))
+
 
 
 def barrido_significancia_variable(signal, backgrounds, variable, derecha = True):
@@ -130,28 +124,34 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
     variable es la variable con la cual se calculará la significancia
     """
     n_cuts = 100 # numero_iteraciones_cortes
-    valores_eficiencias_variable = []
-    valores_cortes = []
+    valores_eficiencias_variable = [] # lista donde se guardan las eficiencias 
+    valores_cortes = [] # lista donde se guardan los cortes realizados
+    empty_data = False # si hay datos vacíos se para el calculo de significancias
 
-    # elimino los valores extremos 
+    # elimino los valores extremos de signal 
     low_data = signal[variable].quantile(0.01)
     high_data  = signal[variable].quantile(0.99)
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
 
+    # elimino los valores extremos de background ################ PREGUNTAR SI USO LOS MISMOS CORTES PARA SIGNAL Y BACKGROUND AQUI! ################
     for background in backgrounds:
         background = background[(background[variable]>low_data) & (background[variable]<high_data)]
 
-    # de momento solo voy a hacerlo 100 veces para usar la funcion .quantile y no dejar el código engorroso, buscar una funcion mejor!
+    # se realiza el barrido de cortes, y se calcula la significancia para cada corte
     for i in range(n_cuts):
 
-        # hago un corte que va aumentando en cada iteracion
-        iteration_cut = signal[variable].quantile(i/n_cuts)
+        # hago un corte a signal que va aumentando en cada iteracion
+        iteration_cut = signal[variable].quantile(i/n_cuts) # LUEGO USAR UNA FUNCION MÁS GENERAL QUE .QUANTILE
         if derecha==True:
             signal = signal[signal[variable]>iteration_cut]
         else:
             signal = signal[signal[variable]<iteration_cut]
 
-        # aplico el corte para cada background de la lista y los guardo en una nueva lista
+        # si me quedo sin datos en el signal paro la simulación
+        if signal.shape[0] == 0:
+            empty_data = True
+
+        # aplico el corte para cada background de la lista que va aumentando en cada iteración
         backgrounds_with_cuts = []
         for background in backgrounds:
             if derecha == True:
@@ -160,9 +160,18 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
                 background = background[background[variable]>iteration_cut]
             backgrounds_with_cuts.append(background)
 
-        # calculo la significancia 
+            # si se queda sin elementos se detiene la simulación
+            if background.shape[0] == 0:
+                empty_data = True
+
+        # si signal o background se queda sin elementos se detiene la simulación
+        if empty_data == True:
+            break
+
+        # se calcula la significancia con los nuevos cortes
         significancia_i = significance(signal, backgrounds_with_cuts)
 
+        # se guarda la significancia y su corte respectivo
         valores_eficiencias_variable.append(significancia_i)
         valores_cortes.append(iteration_cut)
         
@@ -174,8 +183,11 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
 ################################# GRAFICAR #####################################
 ################################################################################
 
+
+
 def graficar(signal, backgrounds, significance, variable):
-    #Uso de Latex en los ejes e instrucciones para graficar.
+
+    # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
     plt.rcParams['font.size'] = 14
     plt.rcParams['text.usetex'] = True
@@ -190,7 +202,8 @@ def graficar(signal, backgrounds, significance, variable):
     scatter = sns.scatterplot(ax = axes[1], x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
     scatter.set_xlabel(variable, fontdict={'size':12})
     scatter.set_ylabel('Significance', fontdict={'size':12})
-
+    scatter.set(xlim=(0,None))
+    scatter.set(ylim=(-1,None))
     # obtengo solo la variable que me interesa de los backgrounds
     list_backgrounds_variable = []
     keys=[]
@@ -225,14 +238,22 @@ def graficar(signal, backgrounds, significance, variable):
     histoplot = sns.histplot(ax = axes[0], data=signal,x=variable, alpha=.7, bins=bins_fix,legend=True)
     histoplot.set_xlabel(variable, fontdict={'size':12})
     histoplot.set_ylabel('Events for ' + str(variable) , fontdict={'size':12})
-    histoplot.legend()
-    #plt.savefig('fig_significance.eps', format = 'eps')
-    #plt.savefig('fig_significance.pdf', format = 'pdf')
+    label_signal = [signal.columns.name]
+    label_background = [background.columns.name] + keys 
+    labels = label_signal + label_background 
+    histoplot.legend(labels=labels)
+    plt.savefig('no_cuts_1.eps', format = 'eps')
+    plt.savefig('no_cuts_1.pdf', format = 'pdf')
+    #plt.legend()
     plt.show()
+
+
 
 ################################################################################
 ################################ EFICIENCIA ####################################
 ################################################################################
+
+
 
 #EFFICIENCY 
 def efficiency(df, df_cut):
@@ -244,36 +265,3 @@ def efficiency(df, df_cut):
         efficiencies.update({variable: df_cut[variable].size/df[variable].size})    #hay que hacerlo con la señal solamente
     return efficiencies
 #background rejection 1 - eff 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#TO DO 
-#1  -   TRANSFORMAR UNIDADES
-#2  -   HACER Y ENTENDER EL CALC_sIGNIFICANCE 
-#3  -   GRAFICAR
-
-
-
-
-################################################################################
-################################### GRAFICAR ###################################
-################################################################################
