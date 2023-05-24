@@ -185,7 +185,7 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
 
 
 
-def graficar(signal, backgrounds, significance, variable):
+def graficar(signal, backgrounds, variable):
 
     # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
@@ -195,7 +195,9 @@ def graficar(signal, backgrounds, significance, variable):
     plt.style.use('classic')
     fig, axes = plt.subplots(2,1, figsize=(10,12), gridspec_kw={'height_ratios': [2, 1]})
     
-    # calculo la significancia 
+    ################## GRAFICO DE SIGNIFICANCIA ##########################
+
+    # calculo la significancia de la variable introducida
     cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
 
     #Scatter de la significancia.
@@ -204,6 +206,9 @@ def graficar(signal, backgrounds, significance, variable):
     scatter.set_ylabel('Significance', fontdict={'size':12})
     scatter.set(xlim=(0,None))
     scatter.set(ylim=(-1,None))
+
+    ################## HISTOGRAMA DE LOS DATOS ##########################
+
     # obtengo solo la variable que me interesa de los backgrounds
     list_backgrounds_variable = []
     keys=[]
@@ -224,26 +229,31 @@ def graficar(signal, backgrounds, significance, variable):
     # guardo todos los datos de la variable en una sola columna, pero con diferente indice
     backgrounds_variable = pd.concat(list_backgrounds_variable, axis=0, keys=keys, names=["simulation", "ID"])
     backgrounds_variable = pd.DataFrame(backgrounds_variable, columns=[variable])
-    # print(backgrounds_variable)
 
     # elimino los datos muy extremos de signal
     low_data = signal[variable].quantile(0.01)
-    high_data  = signal[variable].quantile(0.98)
+    high_data = signal[variable].quantile(0.98)
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
+    # print(signal["MET"])
 
-
-    # se grafican los histoplots
+    # datos previos de los histogramas
     bins_fix = (0,20)
-    sns.histplot(ax = axes[0], data=backgrounds_variable,x=variable, alpha=.7, bins=20, hue='simulation')
-    histoplot = sns.histplot(ax = axes[0], data=signal,x=variable, alpha=.7, bins=bins_fix,legend=True)
+    color_palette = sns.color_palette("hls", len(backgrounds))
+    
+    # se realiza el gráfico de los 
+    sns.histplot(ax = axes[0], data=signal,x=variable, alpha=0.7, bins=20,legend=True)
+    histoplot = sns.histplot(ax = axes[0], data=backgrounds_variable,x=variable, alpha=.7, bins=20, hue='simulation',palette=color_palette)
+
+    #se ponen labels y legends en el grafico
     histoplot.set_xlabel(variable, fontdict={'size':12})
     histoplot.set_ylabel('Events for ' + str(variable) , fontdict={'size':12})
     label_signal = [signal.columns.name]
     label_background = [background.columns.name] + keys 
     labels = label_signal + label_background 
     histoplot.legend(labels=labels)
-    plt.savefig('no_cuts_1.eps', format = 'eps')
-    plt.savefig('no_cuts_1.pdf', format = 'pdf')
+    #histoplot.set(ylim=(None,500000))
+    #plt.savefig('cuts_2_alpha_1.eps', format = 'eps')
+    #plt.savefig('cuts_2_alpha_1.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 

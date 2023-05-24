@@ -65,32 +65,25 @@ if __name__ == '__main__':
     list_cut_df_signals = do_cuts(list_all_signals, cuts, scales)
     list_cut_df_backgrounds = do_cuts(list_all_background, cuts, scales)
 
-    print(list_cut_df_signals[0].describe())
+    #print(list_cut_df_signals[0].describe())
 
     ########################################################
     #################### SIGNIFICANCIA #####################
     ########################################################
 
-    mi_significancia = significance(list_cut_df_signals[0], list_cut_df_backgrounds)
-    print(mi_significancia)
+    # # mi_significancia = significance(list_cut_df_signals[0], list_cut_df_backgrounds)
+    # # print(mi_significancia)
 
-    mi_lista_significancias = barrido_significancia_variable(list_cut_df_signals[0], list_cut_df_backgrounds, "MET")
-    #print(mi_lista_significancias)
+    # # mi_lista_significancias = barrido_significancia_variable(list_cut_df_signals[0], list_cut_df_backgrounds, "MET")
+    # # print(mi_lista_significancias)
 
-    x = range(len(mi_lista_significancias))
-    signficance = mi_lista_significancias      
-    print(list_cut_df_backgrounds)                     
+    # # x = range(len(mi_lista_significancias))
+    # # signficance = mi_lista_significancias      
+    # # print(list_cut_df_backgrounds)                     
     
     #graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
-    graficar(list_cut_df_signals[0],list_all_background, signficance, 'MET')
-    # graficar_test(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
-    #graficar(x, y, "Mi gráfico")
-    #graficar_test(x, y)
-
-    #print(list_all_df[0].describe())
-    #print(do_cuts(list_all_df, cuts)[0].describe())
-    #diccionario = do_cuts_efficiency(list_all_df, cuts)
-    # print(diccionario)
+    graficar(list_all_signals[0],list_all_background, 'MET')
+    #graficar(list_all_signals[0],list_cut_df_backgrounds, signficance, 'MET')
 
 
     
