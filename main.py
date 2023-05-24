@@ -78,7 +78,7 @@ if __name__ == '__main__':
     #print(mi_lista_significancias)
 
     x = range(len(mi_lista_significancias))
-    signficance = mi_lista_significancias                           #CORREGIR EL GRAFICO DE SIGNIFICANCIA!!!!!!!!!!!!!!!!!!!
+    signficance = mi_lista_significancias                           
     
     graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
     # graficar_test(list_cut_df_signals,list_cut_df_backgrounds, signficance, '$\cos\\frac{\pi}{2}$', 'MET')
