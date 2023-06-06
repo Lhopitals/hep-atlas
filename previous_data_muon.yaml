@@ -1,0 +1,98 @@
+signals:
+  VBF_500757: signal/frvz_vbf_500757.root
+  # VBF_500758: signal/frvz_vbf_500758.root
+  # VBF_500759: signal/frvz_vbf_500759.root
+  # VBF_500760: signal/frvz_vbf_500760.root
+  # VBF_500761: signal/frvz_vbf_500761.root
+  # VBF_500762: signal/frvz_vbf_500762.root
+  # VBF_500763: signal/frvz_vbf_500763.root
+  # VBF_500764: signal/frvz_vbf_500764.root
+  
+backgrounds:
+  QCD: background/qcd.root
+  TOP: background/top.root
+  #Wjets: background/wjets_strong_sh227.root
+  #Zjets: background/zjets_strong_sh227.root
+  #Zjj: background/zjets_ewk.root
+  #Wjj: background/wjets_ewk.root
+  #diboson: ../../samples/DPJ/v02-00/abcd-samples-newdef/diboson.root
+
+recover_branches:       #Unidades que debería ser     
+  - njet30  
+  - mjj                 #(GeV)                       
+  - detajj              #Sin unidades (ángulo)
+  - dphijj              #Sin unidades (ángulo)
+  - min_dphi_jetmet     #(GeV) creo
+  - LJjet1_gapRatio 
+  - LJjet1_BIBtagger    #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
+  - MET                 #(GeV)
+  - neleSignal          #N de señal
+  - nmuSignal           #N de señal
+  - metTrig
+  - scale1fb            #Escala luminosidad Femto-barn?
+  - intLumi             #Escala luminosidad Femto-barn?
+  - hasBjet
+  - nLJmus20
+  - LJjet1_timing
+  - LJjet1_DPJtagger   #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
+  - LJjet1_jvt          #Sin unidades
+  - LJjet1_isoID
+  - nLJjets20
+  - jet1_pt             #(GeV)
+
+detector_consts :
+  mevGev: 1000  
+  lum: 140 # Luminosity @ LHC Run-2 (fb-1)
+
+
+cuts:            #[min, max]          #Units  
+  # nLJjets20: [1, .inf]                
+  MET: [225000, .inf]
+  mjj: [1000000, .inf]           
+  # njet30: [1, .inf]        
+  # detajj: [3, .inf]         
+  jet1_pt: [90000, .inf]         
+  # LJjet1_gapRatio: [0.9, .inf] 
+  #LJjet1_BIBtagger: [0.2, .inf]        
+  # LJjet1_jvt: [-.inf, 0.4]       
+  #LJjet1_DPJtagger: [0.5 , 0.95] 
+  # dphijj: [-.inf, 2.5] 
+  LJjet1_isoID: [-.inf, 2000]        
+
+  # LJjet1_timing: [-.inf, 4]     
+  
+  
+  # NOS QUEDAMOS SIN DATOS  
+  #nmuSignal: [0, .inf]            #min
+  #nLJmus20: [0, .inf]           #min
+  #neleSignal: [0 , .inf]            #min
+
+
+  # NO EXISTEN / NO SABEMOS COMO INTERPRETARLO / NO SABEMOS SI ES CORTE MAYOR O MENOR
+  #nLJmu20: [0, .inf]           #min
+  #dphijetmet: [0.4, .inf]            #min
+  # LJ1_index: [-.inf, 0]
+  #caloDPJ: [2, .inf]
+  #muDPJ: [0,.inf]
+
+scale_variable:
+  mjj: 0.001   
+  MET: 0.001  
+  jet1_pt: 0.001
+  LJjet1_isoID: 0.001
+
+
+######################################################################
+################## ESTAS SON LAS VARIABLES DEL PROFE ##################
+#######################################################################
+
+    # # # multiply (GeV) variables by 0.001
+    # # temp_df['jet1_pt'] = temp_df['jet1_pt']*0.001
+    # # temp_df['jet2_pt'] = temp_df['jet2_pt']*0.001
+    # # temp_df['jet1_e'] = temp_df['jet1_e']*0.001
+    # # temp_df['jet2_e'] = temp_df['jet2_e']*0.001
+    # # temp_df['LJjet1_pt'] = temp_df['LJjet1_pt']*0.001
+    # # temp_df['LJjet1_m'] = temp_df['LJjet1_pt']*0.001
+    # # temp_df['MET'] = temp_df['MET']*0.001
+    # # temp_df['mjj'] = temp_df['mjj']*0.001
+    # # temp_df['LJjet1_isoID'] = temp_df['LJjet1_isoID']*0.001 
