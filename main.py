@@ -1,4 +1,5 @@
 from analysis import *
+import sys
 
 if __name__ == '__main__':
 
@@ -6,13 +7,10 @@ if __name__ == '__main__':
     ################## ELECCION DE PATH ####################
     ########################################################
 
+    # tomo la variable 
+    input = int(sys.argv[1])
+
     # seleccionamos el path adecuado
-    print("Hola, ingresa en que maquina estás funcionando")
-    print("1: Gabbo")
-    print("2: Tomilee")
-
-    input = int(input())
-
     if input==1:
         path = '/home/gabbo/hep-atlas/data/'
 
@@ -28,7 +26,7 @@ if __name__ == '__main__':
     ########################################################
 
     # Se crean variables con lo recuperado del archivo .yaml
-    data_yaml = read_data_yaml('previous_data.yaml')
+    data_yaml = read_data_yaml('previous_data_muon.yaml')
 
     # de data_yaml obtenemos los nombres de los datasets
     #datasets = data_yaml['datasets'].values() #esto devuelve solo los valores de cada variable.

@@ -11,7 +11,7 @@ signals:
 backgrounds:
   QCD: background/qcd.root
   TOP: background/top.root
-  #Wjets: background/wjets_strong_sh227.root
+  Wjets: background/wjets_strong_sh227.root
   #Zjets: background/zjets_strong_sh227.root
   #Zjj: background/zjets_ewk.root
   #Wjj: background/wjets_ewk.root
@@ -49,15 +49,18 @@ cuts:            #[min, max]          #Units
   # nLJjets20: [1, .inf]                
   MET: [225000, .inf]
   mjj: [1000000, .inf]           
+  jet1_pt: [90000, .inf]      
+  LJjet1_isoID: [-.inf, 2000]        
+
+  ##### hasta antes hay datos ####
+
   # njet30: [1, .inf]        
-  # detajj: [3, .inf]         
-  jet1_pt: [90000, .inf]         
-  # LJjet1_gapRatio: [0.9, .inf] 
-  #LJjet1_BIBtagger: [0.2, .inf]        
+  #detajj: [3, .inf]         
+  #LJjet1_gapRatio: [0.9, .inf] 
+  LJjet1_BIBtagger: [0.2, .inf]        
   # LJjet1_jvt: [-.inf, 0.4]       
   #LJjet1_DPJtagger: [0.5 , 0.95] 
-  # dphijj: [-.inf, 2.5] 
-  LJjet1_isoID: [-.inf, 2000]        
+  dphijj: [-.inf, 2.5] 
 
   # LJjet1_timing: [-.inf, 4]     
   
@@ -79,7 +82,10 @@ scale_variable:
   mjj: 0.001   
   MET: 0.001  
   jet1_pt: 0.001
-  LJjet1_isoID: 0.001
+  LJjet1_isoID: 1
+  dphijj: 1
+  LJjet1_BIBtagger: 1
+
 
 
 ######################################################################

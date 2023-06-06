@@ -7,10 +7,10 @@ run:
 	python3 main.py
 
 tom: 
-	python3 main.py tom
+	python3 main.py 2
 
 gabbo: 
-	python3 main.py gabbo
+	python3 main.py 1
 
 clean: 
-	rm -f __pycache__
+	rm -r __pycache__

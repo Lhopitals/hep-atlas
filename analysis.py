@@ -240,17 +240,20 @@ def graficar(signal, backgrounds, variable):
     bins_fix = (0,20)
     color_palette = sns.color_palette("hls", len(backgrounds))
     
+    
     # se realiza el gráfico de los 
-    sns.histplot(ax = axes[0], data=signal,x=variable, alpha=0.7, bins=20,legend=True)
-    histoplot = sns.histplot(ax = axes[0], data=backgrounds_variable,x=variable, alpha=.7, bins=20, hue='simulation',palette=color_palette)
-
+    sns.histplot(ax=axes[0], data=signal, x=variable, alpha=0.7, bins=20, label=signal, stat='density', common_norm=False)
+    for i, background in enumerate(backgrounds_variable.index.get_level_values("simulation").unique()):
+        data = backgrounds_variable.xs(background, level="simulation")
+        histoplot = sns.histplot(ax=axes[0], data=data, x=variable, alpha=0.7, bins=20, label=background, stat='density', common_norm=False)
+    
     #se ponen labels y legends en el grafico
     histoplot.set_xlabel(variable, fontdict={'size':12})
     histoplot.set_ylabel('Events for ' + str(variable) , fontdict={'size':12})
-    label_signal = [signal.columns.name]
-    label_background = [background.columns.name] + keys 
-    labels = label_signal + label_background 
-    histoplot.legend(labels=labels)
+    histoplot.legend()
+
+    
+    
     #histoplot.set(ylim=(None,500000))
     #plt.savefig('cuts_2_alpha_1.eps', format = 'eps')
     #plt.savefig('cuts_2_alpha_1.pdf', format = 'pdf')
