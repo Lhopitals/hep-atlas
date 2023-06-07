@@ -64,15 +64,25 @@ if __name__ == '__main__':
     list_cut_df_signals = do_cuts(list_all_signals, cuts, scales)
     list_cut_df_backgrounds = do_cuts(list_all_background, cuts, scales)
 
-    #efficiency(list_all_signals[0], list_all_background, cuts, scales, 'MET')
     #print(list_cut_df_signals[0].describe())
 
     ########################################################
-    ####################### GRAFICOS #######################
+    #################### SIGNIFICANCIA #####################
     ########################################################
 
-    #graficar1(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET')
-    graficar2(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET')
+    # # mi_significancia = significance(list_cut_df_signals[0], list_cut_df_backgrounds)
+    # # print(mi_significancia)
+
+    # # mi_lista_significancias = barrido_significancia_variable(list_cut_df_signals[0], list_cut_df_backgrounds, "MET")
+    # # print(mi_lista_significancias)
+
+    # # x = range(len(mi_lista_significancias))
+    # # signficance = mi_lista_significancias      
+    # # print(list_cut_df_backgrounds)                     
+    
+    #graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
+    graficar(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET')
+    #graficar(list_all_signals[0],list_cut_df_backgrounds, signficance, 'MET')
 
 
     
