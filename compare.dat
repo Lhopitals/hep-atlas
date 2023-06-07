@@ -1,13 +1,19 @@
 Todos los que incluimos----
 
 Dataset             Profe               Mj
-MET                 min:225000          min:225000
-mjj                 min:1000000         min:100000
+MET 
+                min:225000          min:225000
+--mjj     
+            min:1000000         min:100000
 jet1_pt             min:90000           ---
-LJjet1_isoID        max:2000            ---
-njet30              min:1               min:1
-detajj              min:3               min:3
-dphijj              max:2.5             max: 2.5 pero toman abs(value)
+LJjet1_isoID
+        max:2000            ---
+--njet30  
+            min:1               min:1
+detajj  
+            min:3               min:3
+--dphijj
+              max:2.5             max: 2.5 pero toman abs(value)
 LJjet1_BIBtagger    min:0.2             min:0.2
 LJjet1_gapRatio     min:0.9             min:0.9
 LJjet1_jvt          max:0.4             max:0.4
