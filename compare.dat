@@ -1,0 +1,32 @@
+Todos los que incluimos----
+
+Dataset             Profe               Mj
+MET                 min:225000          min:225000
+mjj                 min:1000000         min:100000
+jet1_pt             min:90000           ---
+LJjet1_isoID        max:2000            ---
+njet30              min:1               min:1
+detajj              min:3               min:3
+dphijj              max:2.5             max: 2.5 pero toman abs(value)
+LJjet1_BIBtagger    min:0.2             min:0.2
+LJjet1_gapRatio     min:0.9             min:0.9
+LJjet1_jvt          max:0.4             max:0.4
+LJjet1_DPJtagger    [0.5, 0.95]         min:0.95
+LJjet1_timing       max:4               ---
+
+
+-----------------------------------------------
+------------NO LOS TENEMOS TODAVÍA-------------
+----------------------------------------------
+
+nLJmus20:           min:0               ==0
+nmuSignal           min:0               ==0
+neleSignal          min:0               ==0
+dphijetmet          min:0.4             min:0.4
+LJ1_index           0 no dice mas       ---
+CaloDPJ             2                   ---
+muDPJ               0                   ---
+Ljjets20            min:1               ---
+nLJjets20           min:1               ---
+hasBjet             ---                 ==0
+metTrig             ---                 True

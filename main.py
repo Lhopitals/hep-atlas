@@ -54,6 +54,7 @@ if __name__ == '__main__':
     # # obtenemos una lista de dataframes a partir de los archivos root, los cuales son especificados en datasets y variables
     # list_all_df = read_datasets(datasets, variables)
 
+    # df_weighted(signals)
     ########################################################
     ####################### CORTES #########################
     ########################################################
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     # # print(list_cut_df_backgrounds)                     
     
     #graficar(list_cut_df_signals[0],list_cut_df_backgrounds, signficance, 'MET')
-    graficar(list_all_signals[0],list_all_background, 'MET')
+    graficar(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET')
     #graficar(list_all_signals[0],list_cut_df_backgrounds, signficance, 'MET')
 
 

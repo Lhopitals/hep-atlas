@@ -38,7 +38,7 @@ def read_root_file(path, filename, tree_name):
 #Se define la función con la que se escalan las variables para transformar unidades.
 def scale_df(df, scale):
     for variable in scale:
-        df[variable] = df[variable]#*scale[variable]
+        df[variable] = df[variable]*scale[variable]
     return df
 
 
@@ -61,8 +61,6 @@ def read_datasets(datasets, variables, scale, path):
         list_all_df.append(df_data)
         
     return list_all_df
-
-
 
 #Se le da el corte
 # se realizan los cortes superiores e inferiores a una lista de dataframes
@@ -103,17 +101,53 @@ def significance(signal, backgrounds):
     background es una lista de df
     """
     # se calcula la significancia con la variable "intlumi"
-    signal_weight = signal["intLumi"].sum()
+    signal_weight = (signal["intLumi"]*signal["scale1fb"]).sum()
 
     # se calcula el peso de todos los background
     backgrounds_weight = 0
     for df in backgrounds:
-        background_weight = df["intLumi"].sum()
+        background_weight = (df["intLumi"]*df["scale1fb"]).sum()
         backgrounds_weight += background_weight 
     
     # se calcula la significancia con la fórmula proporcionada
     return np.sqrt(2 * abs( (signal_weight + backgrounds_weight) * np.log(1 + (signal_weight/backgrounds_weight)) - signal_weight))
 
+# INTENTO CREACION DE FUNCION PARA CORTES CON WEIGHT, WEIGHTED DATA
+##############################################################################
+# def all_cuts_weighted(list_dataframes, variables):
+#     """
+#     background es una lista de df
+#     """
+
+
+#     for dataframe in list_dataframes:
+#         signal_weight = (signal["intLumi"]*signal["scale1fb"]).sum()
+
+#     # se calcula el peso de todos los background
+#     backgrounds_weight = 0
+#     for df in backgrounds:
+#         background_weight = (df["intLumi"]*df["scale1fb"]).sum()
+    
+    
+#     return 
+
+# def do_cuts_weight(old_list_all_df):
+
+#     # lista de df's cortados
+#     list_df_with_cuts_weighted = []
+
+#     # se realiza el corte para cada df
+#     for df in old_list_all_df:
+#         weight = (df["intLumi"]*df["scale1fb"]).sum()
+
+#         # se hace el corte de los pesos
+#         df = df[df[variable] > weight]
+
+#         # se guardan los df's cortados en una lista
+#         list_df_with_cuts_weighted.append(df)
+        
+#     return list_df_with_cuts_weighted
+##############################################################################
 
 
 def barrido_significancia_variable(signal, backgrounds, variable, derecha = True):
@@ -128,20 +162,23 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
     valores_cortes = [] # lista donde se guardan los cortes realizados
     empty_data = False # si hay datos vacíos se para el calculo de significancias
 
-    # elimino los valores extremos de signal 
-    low_data = signal[variable].quantile(0.01)
-    high_data  = signal[variable].quantile(0.99)
-    signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
+    # # elimino los valores extremos de signal 
+    # low_data = signal[variable].quantile(porcentaje_bajo)
+    # high_data  = signal[variable].quantile(porcentaje_alto) ###### cambiarlo, poner el mismo numero de abajo
+    # signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
 
-    # elimino los valores extremos de background ################ PREGUNTAR SI USO LOS MISMOS CORTES PARA SIGNAL Y BACKGROUND AQUI! ################
-    for background in backgrounds:
-        background = background[(background[variable]>low_data) & (background[variable]<high_data)]
+    # # elimino los valores extremos de background
+    # for background in backgrounds:
+    #     background = background[(background[variable]>low_data) & (background[variable]<high_data)]
+
+    valor_minimo = signal[variable].min()
+    valor_maximo = signal[variable].max()
 
     # se realiza el barrido de cortes, y se calcula la significancia para cada corte
     for i in range(n_cuts):
-
         # hago un corte a signal que va aumentando en cada iteracion
-        iteration_cut = signal[variable].quantile(i/n_cuts) # LUEGO USAR UNA FUNCION MÁS GENERAL QUE .QUANTILE
+        iteration_cut = valor_minimo + i*(valor_maximo-valor_minimo)/n_cuts
+        
         if derecha==True:
             signal = signal[signal[variable]>iteration_cut]
         else:
@@ -163,10 +200,6 @@ def barrido_significancia_variable(signal, backgrounds, variable, derecha = True
             # si se queda sin elementos se detiene la simulación
             if background.shape[0] == 0:
                 empty_data = True
-
-        # si signal o background se queda sin elementos se detiene la simulación
-        if empty_data == True:
-            break
 
         # se calcula la significancia con los nuevos cortes
         significancia_i = significance(signal, backgrounds_with_cuts)
@@ -193,21 +226,12 @@ def graficar(signal, backgrounds, variable):
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.family'] = "serif"
     plt.style.use('classic')
-    fig, axes = plt.subplots(2,1, figsize=(10,12), gridspec_kw={'height_ratios': [2, 1]})
+    fig, axes = plt.subplots(2,1, figsize=(10,12), gridspec_kw={'height_ratios': [2, 1]}, sharex=True, sharey=False)
     
-    ################## GRAFICO DE SIGNIFICANCIA ##########################
+    porcentaje_bajo = 0
+    porcentaje_alto = 1
 
-    # calculo la significancia de la variable introducida
-    cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
-
-    #Scatter de la significancia.
-    scatter = sns.scatterplot(ax = axes[1], x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
-    scatter.set_xlabel(variable, fontdict={'size':12})
-    scatter.set_ylabel('Significance', fontdict={'size':12})
-    scatter.set(xlim=(0,None))
-    scatter.set(ylim=(-1,None))
-
-    ################## HISTOGRAMA DE LOS DATOS ##########################
+    ################## MODIFICACION DATOS PARA GRAFICAR ##########################
 
     # obtengo solo la variable que me interesa de los backgrounds
     list_backgrounds_variable = []
@@ -216,8 +240,8 @@ def graficar(signal, backgrounds, variable):
         variable_background = background[variable]
 
         # elimino los valores muy grandes
-        low_data = variable_background.quantile(0.01)
-        high_data  = variable_background.quantile(0.98)
+        low_data = variable_background.quantile(porcentaje_bajo)
+        high_data  = variable_background.quantile(porcentaje_alto)
         variable_background = variable_background[(variable_background>low_data) & (variable_background<high_data)]
 
         # guardo los datos de la variable del background
@@ -231,32 +255,46 @@ def graficar(signal, backgrounds, variable):
     backgrounds_variable = pd.DataFrame(backgrounds_variable, columns=[variable])
 
     # elimino los datos muy extremos de signal
-    low_data = signal[variable].quantile(0.01)
-    high_data = signal[variable].quantile(0.98)
+    low_data = signal[variable].quantile(porcentaje_bajo)
+    high_data = signal[variable].quantile(porcentaje_alto)
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
     # print(signal["MET"])
 
+    ################## GRAFICO DE SIGNIFICANCIA ##########################
+
+    # calculo la significancia de la variable introducida
+    cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
+
+    #Scatter de la significancia.
+    scatter = sns.scatterplot(ax = axes[1], x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
+    scatter.set_xlabel(variable, fontdict={'size':12})
+    scatter.set_ylabel('Significance', fontdict={'size':12})
+    # scatter.set(xlim=(0,None))
+    scatter.set(ylim=(-0.1,5))
+
+
+
     # datos previos de los histogramas
-    bins_fix = (0,20)
-    color_palette = sns.color_palette("hls", len(backgrounds))
+    #color_palette = sns.color_palette("hls", len(backgrounds))
+    n_bins = 20
     
+    ################## HISTOGRAMA DE LOS DATOS ##########################
+    sns.histplot(ax=axes[0], data=signal, x=variable, alpha=0.7, stat='density', common_norm=False, label='signal', binrange=(signal[variable].min(), signal[variable].max()), binwidth = 10)
+    for background_name in backgrounds_variable.index.get_level_values("simulation").unique():
+        data = backgrounds_variable.xs(background_name, level="simulation")
+        histoplot = sns.histplot(ax=axes[0], data=data, x=variable, alpha=0.7, label=background_name, stat='density', common_norm=False, binrange=(0, 1000), binwidth = 10)
     
-    # se realiza el gráfico de los 
-    sns.histplot(ax=axes[0], data=signal, x=variable, alpha=0.7, bins=20, label=signal, stat='density', common_norm=False)
-    for i, background in enumerate(backgrounds_variable.index.get_level_values("simulation").unique()):
-        data = backgrounds_variable.xs(background, level="simulation")
-        histoplot = sns.histplot(ax=axes[0], data=data, x=variable, alpha=0.7, bins=20, label=background, stat='density', common_norm=False)
-    
+    # print(backgrounds_variable.xs(background_name, level="simulation"))
     #se ponen labels y legends en el grafico
-    histoplot.set_xlabel(variable, fontdict={'size':12})
-    histoplot.set_ylabel('Events for ' + str(variable) , fontdict={'size':12})
+    histoplot.set_xlabel(str(variable), fontdict={'size':12})
+    histoplot.set_ylabel('Normalised Events for ' + str(variable) , fontdict={'size':12})
     histoplot.legend()
 
     
     
-    #histoplot.set(ylim=(None,500000))
-    #plt.savefig('cuts_2_alpha_1.eps', format = 'eps')
-    #plt.savefig('cuts_2_alpha_1.pdf', format = 'pdf')
+    histoplot.set(ylim=(None,0.07))
+    #plt.savefig('cuts_funcionando.eps', format = 'eps')
+    #plt.savefig('cuts_funcionando.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 
