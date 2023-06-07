@@ -293,8 +293,8 @@ def graficar(signal, backgrounds, variable):
     
     
     histoplot.set(ylim=(None,0.07))
-    #plt.savefig('cuts_funcionando.eps', format = 'eps')
-    #plt.savefig('cuts_funcionando.pdf', format = 'pdf')
+    #plt.savefig('cuts_funcionando_sig.eps', format = 'eps')
+    #plt.savefig('cuts_funcionando_sig.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 
