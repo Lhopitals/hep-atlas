@@ -8,6 +8,8 @@ import yaml
 from tqdm import tqdm # sirve para ver la linea de carga al cargar los archivos
 import pint
 import seaborn as sns
+import mplhep as hep
+hep.style.use(hep.style.ATLAS)
 # import awkward as ak
 # import vector
 
@@ -85,46 +87,12 @@ def do_cuts(old_list_all_df, cuts, scale):
         list_df_with_cuts.append(df)
         
     return list_df_with_cuts
-# INTENTO CREACION DE FUNCION PARA CORTES CON WEIGHT, WEIGHTED DATA
-##############################################################################
-# def all_cuts_weighted(list_dataframes, variables):
-#     """
-#     background es una lista de df
-#     """
-
-
-#     for dataframe in list_dataframes:
-#         signal_weight = (signal["intLumi"]*signal["scale1fb"]).sum()
-
-#     # se calcula el peso de todos los background
-#     backgrounds_weight = 0
-#     for df in backgrounds:
-#         background_weight = (df["intLumi"]*df["scale1fb"]).sum()
-    
-    
-#     return 
-
-# def do_cuts_weight(old_list_all_df):
-
-#     # lista de df's cortados
-#     list_df_with_cuts_weighted = []
-
-#     # se realiza el corte para cada df
-#     for df in old_list_all_df:
-#         weight = (df["intLumi"]*df["scale1fb"]).sum()
-
-#         # se hace el corte de los pesos
-#         df = df[df[variable] > weight]
-
-#         # se guardan los df's cortados en una lista
-#         list_df_with_cuts_weighted.append(df)
-        
-#     return list_df_with_cuts_weighted
-##############################################################################
 
 ################################################################################
-######################### SIGNIFICANCIA Y CORTES ###############################
+############################### SIGNIFICANCIA ##################################
 ################################################################################
+
+
 # SIGNIFICANCE DEFINITION
 def significance(signal, backgrounds):
     """
@@ -244,12 +212,24 @@ def barrido_eficiencia_variable(df, variable, derecha = True):
 
 
 ################################################################################
+################################### WEIGHT #####################################
+################################################################################
+
+
+
+def calc_weight(df):
+    df_weight = df["intLumi"]*df["scale1fb"]
+    return df_weight
+
+
+
+################################################################################
 ################################# GRAFICAR #####################################
 ################################################################################
 
 
 
-def graficar1(signal, backgrounds, variable):
+def graficar_sin_weights(signal, backgrounds, variable):
 
     # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
@@ -332,7 +312,7 @@ def graficar1(signal, backgrounds, variable):
 
 
 
-def graficar2(signal, backgrounds, variable):
+def graficar2(signal, backgrounds, variable, graficar_significancia = True, graficar_eficiencia = True, aplicar_weights = True):
 
     # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
@@ -340,15 +320,36 @@ def graficar2(signal, backgrounds, variable):
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.family'] = "serif"
     plt.style.use('classic')
-    fig, axes = plt.subplots(3,1, figsize=(10,12), sharex=True, sharey=False)
+
+    ################# ELIJO LA FORMA DEL GRAFICO DEPENDIENDO LO QUE QUEREMOS GRAFICAR ################
+    if ((graficar_eficiencia == True) and (graficar_significancia == True)):
+        fig, axes = plt.subplots(3,1, figsize=(10,12), sharex=True, sharey=False)
+        eje_histograma = axes[0]
+        eje_significancia = axes[1]
+        eje_eficiencia = axes[2]
+
+    elif ((graficar_eficiencia == False) and (graficar_significancia == False)):
+        fig, axes = plt.subplots(1,1, figsize=(10,12), sharex=True, sharey=False)
+        eje_histograma = axes
+
+    elif ((graficar_eficiencia == True) and (graficar_significancia == False)):
+        fig, axes = plt.subplots(2,1, figsize=(10,12), sharex=True, sharey=False)
+        eje_histograma = axes[0]
+        eje_eficiencia = axes[1]
+    
+    else: # ((graficar_eficiencia == False) and (graficar_significancia == True))
+        fig, axes = plt.subplots(2,1, figsize=(10,12), sharex=True, sharey=False)
+        eje_histograma = axes[0]
+        eje_significancia = axes[1]
     
     porcentaje_bajo = 0
-    porcentaje_alto = 1
+    porcentaje_alto = 0.98
 
-    ################## MODIFICACION DATOS PARA GRAFICAR ##########################
+    ################## MODIFICACION DATOS PARA GRAFICAR Y CALCULO WEIGHTS ##########################
 
     # obtengo solo la variable que me interesa de los backgrounds
     list_backgrounds_variable = []
+    dict_backgrounds_weight = {}
     keys=[]
     for background in backgrounds:
         variable_background = background[variable]
@@ -360,6 +361,11 @@ def graficar2(signal, backgrounds, variable):
 
         # guardo los datos de la variable del background
         list_backgrounds_variable.append(variable_background)
+
+        # guardo los pesos del dataframe
+        background_weight = calc_weight(background)
+        
+        dict_backgrounds_weight[background.columns.name] = background_weight
 
         # guardo el nombre del background
         keys.append(background.columns.name)
@@ -374,45 +380,71 @@ def graficar2(signal, backgrounds, variable):
     signal = signal[(signal[variable]>low_data) & (signal[variable]<high_data)]
     # print(signal["MET"])
 
+
     ################## GRAFICO DE SIGNIFICANCIA ##########################
-      # calculo la significancia de la variable introducida
-    cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
-    #Scatter de la significancia.
-    scatter_significancia = sns.scatterplot(ax = axes[1], x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
-    scatter_significancia.set_xlabel(variable, fontdict={'size':12})
-    scatter_significancia.set_ylabel('Significance', fontdict={'size':12})
-    # scatter.set(xlim=(0,None))
-    scatter_significancia.set(ylim=(-0.1,5))
+    
+    if graficar_significancia == True:
+        # calculo la significancia de la variable introducida
+        cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
+        #Scatter de la significancia.
+        scatter_significancia = sns.scatterplot(ax = eje_significancia, x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
+        scatter_significancia.set_xlabel(variable, fontdict={'size':12})
+        scatter_significancia.set_ylabel('Significance', fontdict={'size':12})
+        # scatter.set(xlim=(0,None))
+        #scatter_significancia.set(ylim=(-0.1,5))
 
 
     # datos previos de los histogramas
     color_palette = sns.color_palette("hls", len(backgrounds))
-    n_bins = 20
-    
+    n_bins = 50
+    my_binwidth = 20
+
     ################## HISTOGRAMA DE LOS DATOS ##########################
-    sns.histplot(ax=axes[0], data=signal, x=variable, alpha=0.7, stat='density', common_norm=False, label='signal', binrange=(signal[variable].min(), signal[variable].max()), binwidth = 10)
+    if aplicar_weights == True:
+        weight_signal = calc_weight(signal)
+    else:
+        weight_signal = np.ones(signal.shape[0])
+
+    sns.histplot(ax=eje_histograma, data=signal, x=variable, alpha=0.7, stat='density', common_norm=False, label='signal', binrange=(signal[variable].min(), signal[variable].max()), binwidth = my_binwidth, weights=weight_signal)
     for background_name in backgrounds_variable.index.get_level_values("simulation").unique():
         data = backgrounds_variable.xs(background_name, level="simulation")
-        histoplot = sns.histplot(ax=axes[0], data=data, x=variable, alpha=0.7,  label=background_name, stat='density', common_norm=False, binrange=(0, 1000), binwidth = 10)
-    #SE PUEDE PONER UN WEIGHT ENTRE MEDIO DEL HISTPLOT
-    # print(backgrounds_variable.xs(background_name, level="simulation"))
+        if aplicar_weights == True:
+            weight_background = dict_backgrounds_weight[background_name]
+        else:
+            weight_background = np.ones(data.shape[0])
+        histoplot = sns.histplot(ax=eje_histograma, data=data, x=variable, alpha=0.7,  label=background_name, stat='density', common_norm=False, binrange=(signal[variable].min(), signal[variable].max()), binwidth = my_binwidth, weights=weight_background)
+    
     #se ponen labels y legends en el grafico
     histoplot.set_xlabel(str(variable), fontdict={'size':12})
     histoplot.set_ylabel('Normalised Events for ' + str(variable) , fontdict={'size':12})
     histoplot.legend()
-
-    histoplot.set(ylim=(None,0.07))
+    histoplot.ticklabel_format(style='plain', axis='y')
 
     ################## GRAFICO DE EFICIENCIA ##########################
-    # calculo la significancia de la variable introducida
-    cortes, eficiencia_variable = barrido_eficiencia_variable(signal, variable)
-    #Scatter de la significancia.
-    scatter_eficiencia = sns.scatterplot(ax = axes[2], x = cortes, y = eficiencia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
-    scatter_eficiencia.set_xlabel(variable, fontdict={'size':12})
-    scatter_eficiencia.set_ylabel('Efficiency', fontdict={'size':12})
-    # scatter.set(xlim=(0,None))
-    #scatter_significancia .set(ylim=(-0.1,5))
-    
+    if graficar_eficiencia == True:
+        ############################################################################
+        ################ HACER CICLO FOR PARA GRAFICAR EFICIENCIA Y ################
+        ################# SIGNIFICANCIA PARA TODOS LOS BACKGROUNDS #################
+        ############################################################################
+        
+        # calculo la significancia de la variable introducida
+        cortes, eficiencia_variable = barrido_eficiencia_variable(signal, variable)
+        #Scatter de la significancia.
+        scatter_eficiencia = sns.scatterplot(ax = eje_eficiencia, x = cortes, y = eficiencia_variable, marker=(8,2,0), color='red', s=75) #Grafico pequeño
+        scatter_eficiencia.set_xlabel(variable, fontdict={'size':12})
+        scatter_eficiencia.set_ylabel('Efficiency', fontdict={'size':12})
+        # scatter.set(xlim=(0,None))
+        # scatter_eficiencia.set(ylim=(0,None))
+        lista_background_rejection = []
+        for i in range(len(eficiencia_variable)):
+            background_rejection = 1 - eficiencia_variable[i]
+            lista_background_rejection.append(background_rejection)
+        plt.scatter(cortes, lista_background_rejection)    
+        
+        #Calculo la desviación estándar de la lista eficiencia y se agregan al gráfico de eficiencia.
+        # std = np.std(eficiencia_variable)
+        # plt.errorbar(x = cortes, y = eficiencia_variable, yerr = std)
+        #plt.xlim(0,1000)
     
     
     
@@ -420,3 +452,31 @@ def graficar2(signal, backgrounds, variable):
     #plt.savefig('cuts_funcionando_sig_eff.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
+
+
+
+################################################################################
+############################### FIND BEST CUT ##################################
+################################################################################
+
+
+from scipy.interpolate import interp1d
+
+def find_best_cut(signal, backgrounds, variable, method):
+    if method == "significancia":
+        cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
+        index_max_significance = significancia_variable.index(max(significancia_variable))
+        maximo_corte = cortes[index_max_significance]
+        return maximo_corte
+        
+    if method == "eficiencia":
+        cortes, signal_eficiencias = barrido_eficiencia_variable(signal, variable, derecha = True)
+
+        
+        
+        for background in backgrounds:
+            cortes_background, background_eficiencias = barrido_eficiencia_variable(background, variable, derecha = True)
+            pass
+
+        
+        pass
