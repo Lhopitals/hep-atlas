@@ -1,6 +1,14 @@
 #!/usr/bin/python3
 import numpy as np
 import pandas as pd
+# import pyarrow as pa
+# ! pip install --pre pandas==2.0.2 # ponerlo en la terminal
+# print(pd.__version__)
+# pd.options.mode.dtype_backend = 'pyarrow'
+# pd.options.mode.data_manager="pyarrow"
+
+# pd.options.mode.dtype_backend="pyarrow"
+
 import matplotlib.pyplot as plt
 import uproot
 import sys
