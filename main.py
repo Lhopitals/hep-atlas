@@ -45,33 +45,28 @@ if __name__ == '__main__':
     ############# LECTURA DATOS ROOT FILES #################
     ########################################################
 
-    # obtenemos una lista de dataframes a partir de los archivos root, los cuales son especificados en datasets y variables
-    list_all_signals = read_datasets(signals, variables, scales, path)
-    list_all_background = read_datasets(backgrounds, variables, scales, path)
-    
+    df_all = read_datasets(signals, backgrounds, variables, scales, path)
+    print(df_all)
+
     ########################################################
     ####################### CORTES #########################
     ########################################################
 
-    # hacemos los cortes
-    list_cut_df_signals = do_cuts(list_all_signals, cuts, scales)
-    list_cut_df_backgrounds = do_cuts(list_all_background, cuts, scales)
+    df_all_cut = do_cuts(df_all, cuts, scales)
 
     ########################################################
     ####################### GRAFICOS #######################
     ########################################################
 
-    #graficar_sin_weights(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET')
-    graficar2(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET', 
-              graficar_eficiencia=True, 
-              graficar_significancia=True,
-              aplicar_weights=False)
-
-    graficar2(list_cut_df_signals[0],list_cut_df_backgrounds, 'MET', 
-              graficar_eficiencia=True, 
-              graficar_significancia=True,
-              aplicar_weights=True)
-
-
+    graficar(df_all_cut, "jet1_pt", 
+             graficar_significancia = True, 
+             graficar_eficiencia = True, 
+             aplicar_weights = True)
     
-    
+    ##################### GRAFICAR ALL #####################
+
+    # for variable in variables:
+    #     graficar(df_all_cut, variable, 
+    #             graficar_significancia = True, 
+    #             graficar_eficiencia = True, 
+    #             aplicar_weights = True)
