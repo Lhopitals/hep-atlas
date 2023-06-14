@@ -27,8 +27,6 @@ hep.style.use(hep.style.ATLAS)
 ####################### LEER Y CORTAR DATOS ####################
 ################################################################
 
-
-
 # Leer archivos de data_.yaml
 def read_data_yaml(data_yaml_file):
     with open(data_yaml_file) as f:
@@ -102,22 +100,36 @@ def read_datasets(signals, backgrounds, variables, scale, path):
 #Se le da el corte
 # se realizan los cortes superiores e inferiores a una lista de dataframes
 def do_cuts(df_all, cuts, scale):
-
     for variable in cuts:
-        corte_menor = cuts[variable][0]*scale[variable]
-        corte_mayor = cuts[variable][1]*scale[variable]
+        #Definimos si el corte es un booleano. Se ocupa cuando se quieren cortar cosas del estilo Triggers
+        if type(cuts[variable]) == type(True):
+            print("1111111111111111")
+            df_all = df_all[df_all[variable] == cuts[variable]]
+            
+        #Definimos si el corte es una lista, esto se ocupa para cuando se quieren cortar máximos y mínimos.   
+        elif type(cuts[variable]) == type([]):
+            print("2222222222222222")
+            corte_menor = cuts[variable][0]*scale[variable]
+            corte_mayor = cuts[variable][1]*scale[variable]
 
-        df_all = df_all[df_all[variable] < corte_mayor]
-        df_all = df_all[df_all[variable] > corte_menor]
+            df_all = df_all[df_all[variable] < corte_mayor]
+            df_all = df_all[df_all[variable] > corte_menor]
         
+        #Definimos si el corte es un número entero. Se ocupa para cuando queremos separar los datos que tienen que ser un valor específico como un veto.
+        elif type(cuts[variable]) == type(0):
+            print("333333333333333333")
+            df_all = df_all[df_all[variable] == cuts[variable]]
+        
+        else:
+            print("NADA DE NADA")
+            print(type(cuts[variable]))
+
+             
     return df_all
 
 ################################################################################
 ############################### SIGNIFICANCIA ##################################
 ################################################################################
-
-
-
 # SIGNIFICANCE DEFINITION
 def significance(df_all):
 
@@ -215,7 +227,14 @@ def calc_eficiencias(df_all, variable):
     df_eficiencias.set_index(['df_name'], inplace=True)
     return df_eficiencias
 
-
+def calc_bk_rejection(df_all):
+    df_names = df_all.index.get_level_values('df_name').unique()
+    name_signal = df_names[0]
+    df_signal = df_all.query('df_name == @name_signal')
+    df_signal['bk_rejection'] = 1 - df_signal['eficiencias']
+    # df_signal['bk_rejection'] = df_signal.apply(lambda columna: 1-columna[""], axis=1)
+    
+    return df_signal
 
 ################################################################################
 ################################### WEIGHT #####################################
@@ -285,6 +304,9 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     high_data  = df_all.loc["signal"][variable].quantile(porcentaje_alto) 
     df_all = df_all[(df_all[variable]>low_data) & (df_all[variable]<high_data)]
 
+    best_cut_eficiencia = find_best_cut(df_all, variable, "eficiencia")
+    best_cut_significancia = find_best_cut(df_all, variable, "significancia")
+
 
     ################## GRAFICO DE SIGNIFICANCIA ##########################
 
@@ -296,11 +318,12 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         scatter_significancia = sns.scatterplot(ax = eje_significancia, x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
         scatter_significancia.set_xlabel(variable, fontdict={'size':12})
         scatter_significancia.set_ylabel('Significance', fontdict={'size':12})
-
+        scatter_significancia.axvline(x = best_cut_significancia, color = 'red', label = 'corte significancia')
+ 
 
     # datos previos de los histogramas
     # color_palette = sns.color_palette("hls", len(backgrounds))
-    my_binwidth = 20
+    # my_binwidth = (df_all.loc["signal"][variable].min(), df_all.loc["signal"][variable].max())/100.
 
     ################## HISTOGRAMA DE LOS DATOS ##########################
     # if aplicar_weights == True:
@@ -318,7 +341,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                              stat='density', 
                              common_norm=False, 
                              binrange=(df_all.loc["signal"][variable].min(), df_all.loc["signal"][variable].max()), 
-                             binwidth = my_binwidth, 
+                             binwidth = 0.1,  
                              weights=calc_weight(df_all))
     
 
@@ -326,6 +349,9 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     histoplot.set_xlabel(str(variable), fontdict={'size':12})
     histoplot.set_ylabel('Normalised Events for ' + str(variable) , fontdict={'size':12})
     histoplot.ticklabel_format(style='plain', axis='y')
+    histoplot.axvline(x = best_cut_significancia, color = 'red', label = 'corte significancia')
+    histoplot.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte significancia')
+
 
     ################## GRAFICO DE EFICIENCIA ##########################
     # color_palette = sns.color_palette("hls", len(backgrounds))
@@ -345,13 +371,25 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         # modificaciones graficos eficiencias
         scatter_eficiencia.set_xlabel(variable, fontdict={'size':12})
         scatter_eficiencia.set_ylabel('Efficiency', fontdict={'size':12})
-
+        scatter_eficiencia.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte significancia')
+        
+        bk_rejection = calc_bk_rejection(df_eficiencias)
+        print(bk_rejection)
+        sns.scatterplot(data=bk_rejection, 
+                        x="cortes", 
+                        y="bk_rejection", 
+                        color = 'black', 
+                        legend=True, 
+                        marker=(8,2,0), 
+                        s=30
+                        )
+        
         ################## GRAFICO DE REJECTION ##########################
-        # lista_background_rejection = []
-        # for i in range(len(eficiencia_variable)):
-        #     background_rejection = 1 - eficiencia_variable[i]
-        #     lista_background_rejection.append(background_rejection)
-        # plt.scatter(cortes, lista_background_rejection)    
+        #print(df_eficiencias.shape)
+        print ("###########################################################")
+        print ("###########################################################")
+        print ("###########################################################")
+        
         
         ################## GRAFICO DE DESVIACION ##########################
         #Calculo la desviación estándar de la lista eficiencia y se agregan al gráfico de eficiencia.
@@ -361,8 +399,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     
     
     
-    #plt.savefig('cuts_funcionando_sig_eff.eps', format = 'eps')
-    #plt.savefig('cuts_funcionando_sig_eff.pdf', format = 'pdf')
+    plt.savefig('complete_Graph1_dphijj.eps', format = 'eps')
+    plt.savefig('complete_Graph1_dphijj.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 
@@ -373,8 +411,6 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 ################################################################################
 
 
-from scipy.interpolate import interp1d
-
 def find_best_cut(df_all, variable, method):
     if method == "significancia":
         cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
@@ -384,23 +420,20 @@ def find_best_cut(df_all, variable, method):
         
     if method == "eficiencia":
         df_all_eficiencias = calc_eficiencias(df_all, variable)
-        print(df_all_eficiencias)
-
-        # df_names = df_all.index.get_level_values('df_name').unique()
-        # for df_name in df_all.index.get_level_values('df_name').unique():
-        #     for i in range(len(df_names)):
-        #         diferencia = df_all_eficiencias[df_name]-df_all_eficiencias[df_names[i]]
-        #         pass
 
         df_names = df_all.index.get_level_values('df_name').unique()
         promedio_mejor_corte = 0
         numero_backgrounds = len(df_names)-1
+
+        bk_rejection_signal_original = calc_bk_rejection(df_all_eficiencias)
+        bk_rejection_signal = bk_rejection_signal_original.reset_index()["bk_rejection"]
+
         for i in range(numero_backgrounds):
-            # calculo todas las distancias en el eje y entre  CON EL EJE Y YA SIRVE!!!!!
-            diferencia = df_all_eficiencias.query('df_name == @df_names[0]')["eficiencias"] #-df_all_eficiencias.query('df_name == @df_names[i+1]')["eficiencias"]
-            index_min_diferencia = diferencia.index(min(diferencia))
-            # index_min_diferencia = diferencia.index(min(abs(diferencia)))
-            maximo_corte = df_all_eficiencias[df_names[0]][index_min_diferencia]
+            # calculo todas las distancias en el eje y
+            df_name_i_1 = df_names[i+1]
+            diferencia = abs(bk_rejection_signal-df_all_eficiencias.query('df_name == @df_name_i_1').reset_index()["eficiencias"])
+            idxmin_diferencia = diferencia.idxmin()
+            maximo_corte = bk_rejection_signal_original["cortes"][idxmin_diferencia]
 
             promedio_mejor_corte += maximo_corte/numero_backgrounds
         return promedio_mejor_corte

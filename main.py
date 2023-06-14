@@ -54,11 +54,21 @@ if __name__ == '__main__':
 
     df_all_cut = do_cuts(df_all, cuts, scales)
 
+    #df_bk = calc_bk_rejection(df_all_cut)
+    #print(df_bk.shape)
+
+
     ########################################################
     ####################### GRAFICOS #######################
     ########################################################
 
-    graficar(df_all_cut, "jet1_pt", 
+    variable = "dphijj"
+
+    ########################################################
+    ####################### GRAFICOS #######################
+    ########################################################
+
+    graficar(df_all_cut, variable, 
              graficar_significancia = True, 
              graficar_eficiencia = True, 
              aplicar_weights = True)
@@ -73,4 +83,5 @@ if __name__ == '__main__':
 
     ################### FIND BEST CUT ######################
 
-    find_best_cut(df_all_cut, "MET", "eficiencia")
+    # find_best_cut(df_all_cut, variable, "b")
+    # print(find_best_cut(df_all_cut, "MET", "eficiencias"))
