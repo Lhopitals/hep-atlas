@@ -70,3 +70,7 @@ if __name__ == '__main__':
     #             graficar_significancia = True, 
     #             graficar_eficiencia = True, 
     #             aplicar_weights = True)
+
+    ################### FIND BEST CUT ######################
+
+    find_best_cut(df_all_cut, "MET", "eficiencia")

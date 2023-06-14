@@ -375,21 +375,32 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
 from scipy.interpolate import interp1d
 
-def find_best_cut(signal, backgrounds, variable, method):
+def find_best_cut(df_all, variable, method):
     if method == "significancia":
-        cortes, significancia_variable = barrido_significancia_variable(signal, backgrounds, variable)
+        cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
         index_max_significance = significancia_variable.index(max(significancia_variable))
         maximo_corte = cortes[index_max_significance]
         return maximo_corte
         
     if method == "eficiencia":
-        cortes, signal_eficiencias = barrido_eficiencia_variable(signal, variable, derecha = True)
+        df_all_eficiencias = calc_eficiencias(df_all, variable)
+        print(df_all_eficiencias)
 
-        
-        
-        for background in backgrounds:
-            cortes_background, background_eficiencias = barrido_eficiencia_variable(background, variable, derecha = True)
-            pass
+        # df_names = df_all.index.get_level_values('df_name').unique()
+        # for df_name in df_all.index.get_level_values('df_name').unique():
+        #     for i in range(len(df_names)):
+        #         diferencia = df_all_eficiencias[df_name]-df_all_eficiencias[df_names[i]]
+        #         pass
 
-        
-        pass
+        df_names = df_all.index.get_level_values('df_name').unique()
+        promedio_mejor_corte = 0
+        numero_backgrounds = len(df_names)-1
+        for i in range(numero_backgrounds):
+            # calculo todas las distancias en el eje y entre  CON EL EJE Y YA SIRVE!!!!!
+            diferencia = df_all_eficiencias.query('df_name == @df_names[0]')["eficiencias"] #-df_all_eficiencias.query('df_name == @df_names[i+1]')["eficiencias"]
+            index_min_diferencia = diferencia.index(min(diferencia))
+            # index_min_diferencia = diferencia.index(min(abs(diferencia)))
+            maximo_corte = df_all_eficiencias[df_names[0]][index_min_diferencia]
+
+            promedio_mejor_corte += maximo_corte/numero_backgrounds
+        return promedio_mejor_corte
