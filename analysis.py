@@ -100,26 +100,42 @@ def read_datasets(signals, backgrounds, variables, scale, path):
 #Se le da el corte
 # se realizan los cortes superiores e inferiores a una lista de dataframes
 def do_cuts(df_all, cuts, scale):
+    # nombre de la señal a la cual se le mostrará el número de eventos
+    name_signal = df_all.index.get_level_values('df_name').unique()[0]
+
+    # se aplican todos los cortes
     for variable in cuts:
+        # se grafica el numero de eventos
+        numero_eventos_antes = df_all.query('df_name == @name_signal').shape[0]
+        print(f'Numero eventos antes: {numero_eventos_antes}')
+        
         #Definimos si el corte es un booleano. Se ocupa cuando se quieren cortar cosas del estilo Triggers
         if type(cuts[variable]) == type(True):
+            print(f'Corte: {variable} == {cuts[variable]}')
             df_all = df_all[df_all[variable] == cuts[variable]]
+
             
         #Definimos si el corte es una lista, esto se ocupa para cuando se quieren cortar máximos y mínimos.   
         elif type(cuts[variable]) == type([]):
             corte_menor = cuts[variable][0]*scale[variable]
             corte_mayor = cuts[variable][1]*scale[variable]
-
+            
+            print(f'Corte: {variable} entre {cuts[variable]}')
             df_all = df_all[df_all[variable] < corte_mayor]
             df_all = df_all[df_all[variable] > corte_menor]
+
         
         #Definimos si el corte es un número entero. Se ocupa para cuando queremos separar los datos que tienen que ser un valor específico como un veto.
         elif type(cuts[variable]) == type(0):
+            print(f'Corte: {variable} == {cuts[variable]}')
             df_all = df_all[df_all[variable] == cuts[variable]]
+
         
         else:
             print("ADVERTENCIA: NO TOMA LA VARIABLE DEL CORTE")
 
+        numero_eventos_despues = df_all.query('df_name == @name_signal').shape[0]
+        print(f'Numero eventos antes: {numero_eventos_despues} \n')
              
     return df_all
 
@@ -268,7 +284,13 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
 
     if ((graficar_eficiencia == True) and (graficar_significancia == True)):
-        fig, axes = plt.subplots(3,1, figsize=(10,12), sharex=True, sharey=False)
+        fig, axes = plt.subplots(3,1, figsize=(10,12), sharex=True, sharey=False,  gridspec_kw={'height_ratios': [2.5, 1.2, 1.2]})
+        #fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+        #fig.tight_layout(fig)
+        
+        ###################################### TO DO : ################################
+        ###################### CORREGIR LOS BORDES DEL GRAFICO #######################
+        
         eje_histograma = axes[0]
         eje_significancia = axes[1]
         eje_eficiencia = axes[2]
@@ -363,7 +385,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                                              x = "cortes", 
                                              y = "eficiencias", 
                                              hue=df_eficiencias.index.get_level_values('df_name'),
-                                             legend=True,
+                                             #legend=True,
                                              marker=(8,2,0), 
                                              s=75)
 
@@ -378,8 +400,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                         x="cortes", 
                         y="bk_rejection", 
                         color = 'black', 
-                        label = "bk rejection signal",
-                        legend=True, 
+                        #label = "bk rejection signal",
+                        #legend=True, 
                         marker=(8,2,0), 
                         s=30
                         )
@@ -402,8 +424,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     
     
     
-    plt.savefig('complete_Graph1_dphijj.eps', format = 'eps')
-    plt.savefig('complete_Graph1_dphijj.pdf', format = 'pdf')
+    plt.savefig('complete_Graph1_MET.eps', format = 'eps')
+    plt.savefig('complete_Graph1_MET.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 
