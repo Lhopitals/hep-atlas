@@ -103,12 +103,10 @@ def do_cuts(df_all, cuts, scale):
     for variable in cuts:
         #Definimos si el corte es un booleano. Se ocupa cuando se quieren cortar cosas del estilo Triggers
         if type(cuts[variable]) == type(True):
-            print("1111111111111111")
             df_all = df_all[df_all[variable] == cuts[variable]]
             
         #Definimos si el corte es una lista, esto se ocupa para cuando se quieren cortar máximos y mínimos.   
         elif type(cuts[variable]) == type([]):
-            print("2222222222222222")
             corte_menor = cuts[variable][0]*scale[variable]
             corte_mayor = cuts[variable][1]*scale[variable]
 
@@ -117,12 +115,10 @@ def do_cuts(df_all, cuts, scale):
         
         #Definimos si el corte es un número entero. Se ocupa para cuando queremos separar los datos que tienen que ser un valor específico como un veto.
         elif type(cuts[variable]) == type(0):
-            print("333333333333333333")
             df_all = df_all[df_all[variable] == cuts[variable]]
         
         else:
-            print("NADA DE NADA")
-            print(type(cuts[variable]))
+            print("ADVERTENCIA: NO TOMA LA VARIABLE DEL CORTE")
 
              
     return df_all
@@ -262,7 +258,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
     # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
-    plt.rcParams['font.size'] = 14
+    plt.rcParams['font.size'] = 24 # estaba en 14
     plt.rcParams['text.usetex'] = True
     plt.rcParams['font.family'] = "serif"
     plt.style.use('classic')
@@ -323,7 +319,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
     # datos previos de los histogramas
     # color_palette = sns.color_palette("hls", len(backgrounds))
-    # my_binwidth = (df_all.loc["signal"][variable].min(), df_all.loc["signal"][variable].max())/100.
+    # my_binwidth = (df_all.loc["signal"][variable].max() - df_all.loc["signal"][variable].min())/100.
+    n_bins = 10
 
     ################## HISTOGRAMA DE LOS DATOS ##########################
     # if aplicar_weights == True:
@@ -337,12 +334,15 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                              x=variable, 
                              hue=df_all.index.get_level_values('df_name'),
                              legend=True,
-                             alpha=0.7,  
+                             alpha=0.05,  
                              stat='density', 
                              common_norm=False, 
                              binrange=(df_all.loc["signal"][variable].min(), df_all.loc["signal"][variable].max()), 
-                             binwidth = 0.1,  
-                             weights=calc_weight(df_all))
+                             binwidth = (df_all.loc["signal"][variable].max() - df_all.loc["signal"][variable].min())/n_bins,  
+                             weights=calc_weight(df_all), 
+                             element="step", 
+                            #  fill=False,
+                             )
     
 
     #se ponen labels y legends en el grafico
@@ -371,24 +371,27 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         # modificaciones graficos eficiencias
         scatter_eficiencia.set_xlabel(variable, fontdict={'size':12})
         scatter_eficiencia.set_ylabel('Efficiency', fontdict={'size':12})
-        scatter_eficiencia.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte significancia')
         
+        # calculo y grafico el background rejection de signal
         bk_rejection = calc_bk_rejection(df_eficiencias)
-        print(bk_rejection)
         sns.scatterplot(data=bk_rejection, 
                         x="cortes", 
                         y="bk_rejection", 
                         color = 'black', 
+                        label = "bk rejection signal",
                         legend=True, 
                         marker=(8,2,0), 
                         s=30
                         )
         
+        # grafico de la linea de corte
+        scatter_eficiencia.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte eficiencia')
+        
         ################## GRAFICO DE REJECTION ##########################
         #print(df_eficiencias.shape)
-        print ("###########################################################")
-        print ("###########################################################")
-        print ("###########################################################")
+        # print ("###########################################################")
+        # print ("###########################################################")
+        # print ("###########################################################")
         
         
         ################## GRAFICO DE DESVIACION ##########################
@@ -404,7 +407,15 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     #plt.legend()
     plt.show()
 
+    ############## VIOLIN PLOT ####################
+    # sns.violinplot(data=df_all, x=variable, y=df_all.index.get_level_values('df_name'))
+    # plt.show()
 
+    ############## PIE PLOT ####################
+    df_all.groupby(level='origin').size().plot(kind='pie', autopct='%1.1f%%', startangle=90)
+    plt.show()
+
+    
 
 ################################################################################
 ############################### FIND BEST CUT ##################################
