@@ -199,7 +199,8 @@ def barrido_eficiencia_variable(df, variable, derecha = True):
     n_cuts = 100 # numero_iteraciones_cortes
     valores_eficiencias_variable = [] # lista donde se guardan las eficiencias 
     valores_cortes = [] # lista donde se guardan los cortes realizados
-
+    n_datos = [] # lista que va a guardar la cantidad de elementos de dataframe
+    # n_datos.append(df.shape[0])
 
     valor_minimo = df[variable].min()
     valor_maximo = df[variable].max()
@@ -224,29 +225,29 @@ def barrido_eficiencia_variable(df, variable, derecha = True):
         # se guarda la significancia y su corte respectivo
         valores_eficiencias_variable.append(eficiencia_i)
         valores_cortes.append(iteration_cut)
+        n_datos.append(df_cut.shape[0])
         
-    return valores_cortes, valores_eficiencias_variable
+    # Se devuelve un DataFrame con dos columnas
+    df_eficiencias = pd.DataFrame({
+        'n_datos': n_datos,
+        'cortes': valores_cortes,
+        'eficiencias': valores_eficiencias_variable
+    })
+
+    return df_eficiencias
+    # return [valores_cortes, valores_eficiencias_variable]
 
 
 
 def calc_eficiencias(df_all, variable):
-    df_eficiencias = pd.DataFrame()
-    for df_name_i in df_all.index.get_level_values('df_name').unique():
-        cortes, eficiencias = barrido_eficiencia_variable(df_all.query('df_name == @df_name_i'), variable)
-        df_eficiencia = pd.DataFrame({'cortes':cortes, 'eficiencias':eficiencias})
-        df_eficiencia["df_name"] = df_name_i
-        df_eficiencias = pd.concat([df_eficiencias, df_eficiencia], axis=0)
-    df_eficiencias.set_index(['df_name'], inplace=True)
+    df_eficiencias = df_all.groupby(["origin", "df_name"]) \
+                            .apply(lambda grupo: barrido_eficiencia_variable(grupo, variable))
     return df_eficiencias
 
-def calc_bk_rejection(df_all):
-    df_names = df_all.index.get_level_values('df_name').unique()
-    name_signal = df_names[0]
-    df_signal = df_all.query('df_name == @name_signal')
-    df_signal['bk_rejection'] = 1 - df_signal['eficiencias']
-    # df_signal['bk_rejection'] = df_signal.apply(lambda columna: 1-columna[""], axis=1)
-    
-    return df_signal
+def calc_bk_rejection(df_all, variable):
+    df_eficiencias = calc_eficiencias(df_all, variable)
+    df_eficiencias['bk_rejection'] = 1 - df_eficiencias['eficiencias']
+    return df_eficiencias
 
 ################################################################################
 ################################### WEIGHT #####################################
@@ -378,13 +379,16 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     ################## GRAFICO DE EFICIENCIA ##########################
     # color_palette = sns.color_palette("hls", len(backgrounds))
     if graficar_eficiencia == True:
+
+        ######################### EFICIENCIA ##########################
         
-        df_eficiencias = calc_eficiencias(df_all, variable)
+        eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')
         scatter_eficiencia = sns.scatterplot(ax = eje_eficiencia, 
-                                             data=df_eficiencias, 
+                                             data=eficiencias_signal, 
                                              x = "cortes", 
                                              y = "eficiencias", 
-                                             hue=df_eficiencias.index.get_level_values('df_name'),
+                                             color = 'black', 
+                                            #  hue=df_eficiencias.index.get_level_values('df_name'),
                                              #legend=True,
                                              marker=(8,2,0), 
                                              s=75)
@@ -394,12 +398,15 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         scatter_eficiencia.set_xlabel(variable, fontdict={'size':12})
         scatter_eficiencia.set_ylabel('Efficiency', fontdict={'size':12})
         
+        ######################### REJECTION ##########################
+
         # calculo y grafico el background rejection de signal
-        bk_rejection = calc_bk_rejection(df_eficiencias)
-        sns.scatterplot(data=bk_rejection, 
+        bk_rejection_background = calc_bk_rejection(df_all, variable).query('origin == "background"')
+        sns.scatterplot(data=bk_rejection_background, 
                         x="cortes", 
                         y="bk_rejection", 
-                        color = 'black', 
+                        # color = 'black', 
+                        hue=bk_rejection_background.index.get_level_values('df_name'),
                         #label = "bk rejection signal",
                         #legend=True, 
                         marker=(8,2,0), 
@@ -409,17 +416,14 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         # grafico de la linea de corte
         scatter_eficiencia.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte eficiencia')
         
-        ################## GRAFICO DE REJECTION ##########################
-        #print(df_eficiencias.shape)
-        # print ("###########################################################")
-        # print ("###########################################################")
-        # print ("###########################################################")
-        
-        
-        ################## GRAFICO DE DESVIACION ##########################
+        ####################### BARRAS DE ERROR ##########################
         #Calculo la desviación estándar de la lista eficiencia y se agregan al gráfico de eficiencia.
         # std = np.std(eficiencia_variable)
-        # plt.errorbar(x = cortes, y = eficiencia_variable, yerr = std)
+        plt.errorbar(x = eficiencias_signal["cortes"], 
+                     y = eficiencias_signal["eficiencias"], 
+                     yerr = np.sqrt(1/eficiencias_signal["n_datos"]), # multiplicar por desviacion estandar?, tendría que guardarla en la funcion de las eficiencias
+                     fmt='none', 
+                     linestyle='none')
         #plt.xlim(0,1000)
     
     
@@ -452,21 +456,14 @@ def find_best_cut(df_all, variable, method):
         return maximo_corte
         
     if method == "eficiencia":
-        df_all_eficiencias = calc_eficiencias(df_all, variable)
+        eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')["eficiencias"]
 
-        df_names = df_all.index.get_level_values('df_name').unique()
-        promedio_mejor_corte = 0
-        numero_backgrounds = len(df_names)-1
+        bk_rejection = calc_bk_rejection(df_all, variable)
+        bk_rejection_bk = bk_rejection["bk_rejection"]
 
-        bk_rejection_signal_original = calc_bk_rejection(df_all_eficiencias)
-        bk_rejection_signal = bk_rejection_signal_original.reset_index()["bk_rejection"]
-
-        for i in range(numero_backgrounds):
-            # calculo todas las distancias en el eje y
-            df_name_i_1 = df_names[i+1]
-            diferencia = abs(bk_rejection_signal-df_all_eficiencias.query('df_name == @df_name_i_1').reset_index()["eficiencias"])
-            idxmin_diferencia = diferencia.idxmin()
-            maximo_corte = bk_rejection_signal_original["cortes"][idxmin_diferencia]
-
-            promedio_mejor_corte += maximo_corte/numero_backgrounds
+        promedio_mejor_corte = bk_rejection_bk.groupby("df_name") \
+                                                .apply(lambda nk_rejection_i: (abs(nk_rejection_i.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))).idxmin()) \
+                                                .apply(lambda id_minimo: bk_rejection["cortes"][id_minimo]) \
+                                                .mean()
+        
         return promedio_mejor_corte
