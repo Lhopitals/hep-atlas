@@ -130,7 +130,11 @@ def do_cuts(df_all, cuts, scale):
             print(f'Corte: {variable} == {cuts[variable]}')
             df_all = df_all[df_all[variable] == cuts[variable]]
 
-        
+
+        # elif type(cuts[variable]) == type(''):
+        #     print(f'Corte: {variable} == {cuts[variable]}')
+        #     df_all = df_all[df_all[variable] == cuts[variable]]
+            
         else:
             print("ADVERTENCIA: NO TOMA LA VARIABLE DEL CORTE")
 
@@ -138,6 +142,8 @@ def do_cuts(df_all, cuts, scale):
         print(f'Numero eventos antes: {numero_eventos_despues} \n')
              
     return df_all
+
+
 
 ################################################################################
 ############################### SIGNIFICANCIA ##################################
@@ -244,8 +250,18 @@ def calc_eficiencias(df_all, variable):
                             .apply(lambda grupo: barrido_eficiencia_variable(grupo, variable))
     return df_eficiencias
 
+
+
 def calc_bk_rejection(df_all, variable):
     df_eficiencias = calc_eficiencias(df_all, variable)
+    df_eficiencias['bk_rejection'] = 1 - df_eficiencias['eficiencias']
+    return df_eficiencias
+
+
+
+def calc_bk_rejection_all_background(df_all, variable):
+    df_background = df_all.query('origin == "background"')
+    df_eficiencias = barrido_eficiencia_variable(df_background, variable)
     df_eficiencias['bk_rejection'] = 1 - df_eficiencias['eficiencias']
     return df_eficiencias
 
@@ -412,6 +428,19 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                         marker=(8,2,0), 
                         s=30
                         )
+
+        # calculo el background rejection de todos los backgrounds unidos
+        bk_rejection_all_background = calc_bk_rejection_all_background(df_all, variable)
+        sns.scatterplot(data=bk_rejection_all_background, 
+                        x="cortes", 
+                        y="bk_rejection", 
+                        color = 'black', 
+                        # hue=bk_rejection_background.index.get_level_values('df_name'),
+                        #label = "bk rejection signal",
+                        #legend=True, 
+                        marker=(8,2,0), 
+                        s=30
+                        )
         
         # grafico de la linea de corte
         scatter_eficiencia.axvline(x = best_cut_eficiencia, color = 'blue', label = 'corte eficiencia')
@@ -438,9 +467,11 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     # plt.show()
 
     ############## PIE PLOT ####################
-    df_all.groupby(level='origin').size().plot(kind='pie', autopct='%1.1f%%', startangle=90)
-    plt.show()
+    # df_all.groupby(level='origin').size().plot(kind='pie', autopct='%1.1f%%', startangle=90)
+    # plt.show()
 
+    ############## SIGNIFICANCIA A TRAVES DE LOS CORTES #################
+    # sns.barplo()
     
 
 ################################################################################
@@ -458,12 +489,127 @@ def find_best_cut(df_all, variable, method):
     if method == "eficiencia":
         eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')["eficiencias"]
 
-        bk_rejection = calc_bk_rejection(df_all, variable)
+        bk_rejection = calc_bk_rejection_all_background(df_all, variable)
         bk_rejection_bk = bk_rejection["bk_rejection"]
 
-        promedio_mejor_corte = bk_rejection_bk.groupby("df_name") \
-                                                .apply(lambda nk_rejection_i: (abs(nk_rejection_i.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))).idxmin()) \
-                                                .apply(lambda id_minimo: bk_rejection["cortes"][id_minimo]) \
-                                                .mean()
+        diferencia = abs(bk_rejection_bk.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))
+        indice_minima_diferencia = diferencia.idxmin()
+        corte_interseccion = bk_rejection["cortes"][indice_minima_diferencia]
         
-        return promedio_mejor_corte
+        return corte_interseccion
+
+
+
+################################################################################
+################################# TESTING CUT ##################################
+################################################################################
+
+# se realizan los cortes superiores e inferiores a una lista de dataframes
+def test_cuts(df_all, cuts, scale):
+
+    df_original = df_all
+
+    significancias = []
+    eficiencias = []
+    cortes = []
+    variables = []
+    n_datos = []
+    n_datos_signal = []
+    n_datos_background = []
+
+    significancias.append(significance(df_all))
+    eficiencias.append(efficiency(df_all, df_all))
+    cortes.append(0)
+    variables.append("")
+    n_datos.append(df_all.shape[0])
+    n_datos_signal.append(df_all.query('origin=="signal"').shape[0])
+    n_datos_background.append(df_all.query('origin=="background"').shape[0])
+
+    # se aplican todos los cortes
+    for variable in cuts:
+        
+        #Definimos si el corte es un booleano. Se ocupa cuando se quieren cortar cosas del estilo Triggers
+        if type(cuts[variable]) == type(True):
+            print(f'Corte: {variable} == {cuts[variable]}')
+            df_all = df_all[df_all[variable] == cuts[variable]]
+
+            
+        #Definimos si el corte es una lista, esto se ocupa para cuando se quieren cortar máximos y mínimos.   
+        elif type(cuts[variable]) == type([]):
+            corte_menor = cuts[variable][0]*scale[variable]
+            corte_mayor = cuts[variable][1]*scale[variable]
+            
+            print(f'Corte: {variable} entre {cuts[variable]}')
+            df_all = df_all[df_all[variable] < corte_mayor]
+            df_all = df_all[df_all[variable] > corte_menor]
+
+        
+        #Definimos si el corte es un número entero. Se ocupa para cuando queremos separar los datos que tienen que ser un valor específico como un veto.
+        elif type(cuts[variable]) == type(0):
+            print(f'Corte: {variable} == {cuts[variable]}')
+            df_all = df_all[df_all[variable] == cuts[variable]]
+
+
+        elif type(cuts[variable]) == type(''):
+            print(f'Corte: {variable} == {cuts[variable]}')
+            df_all = df_all[df_all[variable] == cuts[variable]]
+            
+        else:
+            print("ADVERTENCIA: NO TOMA LA VARIABLE DEL CORTE")
+             
+        significancias.append(significance(df_all))
+        eficiencias.append(efficiency(df_original, df_all))
+        cortes.append(df_all[variable])
+        variables.append(variable)
+        n_datos.append(df_all.shape[0])
+        n_datos_signal.append(df_all.query('origin=="signal"').shape[0])
+        n_datos_background.append(df_all.query('origin=="background"').shape[0])
+    
+    df_data = pd.DataFrame({
+        'cortes': cortes,
+        'variables': variables,
+        # 'n_datos': n_datos,
+        'n_datos_background': n_datos_background,
+        'n_datos_signal': n_datos_signal,
+        'eficiencias': eficiencias,
+        'significancias': significancias
+    })
+
+    ####### STACKED ############
+    # sns.barplot(data = df_data, x = "variables", y = "n_datos")
+    # df_data.plot(x='variables', kind='bar', stacked=True,
+    #     title='Stacked Bar Graph by dataframe')
+    # axes = df_data.plot.bar(rot=0, subplots=True)
+    # axes[1].legend(loc=2)  
+    
+    ax1 = plt.subplot(1,1,1)
+    w = 0.3
+    
+    #plt.xticks(), will label the bars on x axis with the respective country names.
+    x = np.arange(df_data['variables'].shape[0])
+    plt.xticks(x + w /2, df_data['variables'], rotation='vertical')
+
+    cmap_rojo =plt.get_cmap("Reds")
+
+    valores_normalizados_signal = (df_data['n_datos_signal']) / (df_data['n_datos_background'].max())
+    valores_normalizados_background = (df_data['n_datos_background']) / (df_data['n_datos_background'].max())
+
+    cmap_rojo_signal = cmap_rojo(valores_normalizados_signal)
+    cmap_rojo_background = cmap_rojo(valores_normalizados_background)
+
+    background =ax1.bar(x, df_data['n_datos_background'], width=w, color=cmap_rojo_background, align='center')
+    #The trick is to use two different axes that share the same x axis, we have used ax1.twinx() method.
+    ax2 = ax1.twinx()
+    #We have calculated GDP by dividing gdpPerCapita to population.
+    signal =ax2.bar(x + w, df_data['n_datos_signal'], width=w,color=cmap_rojo_signal,align='center')
+    
+    # pongo los label de cada barra 
+    bars = ax1.bar(x, eficiencias)
+    ax1.bar_label(bars, label_type='edge')
+
+    #Set the Y axis label as GDP.
+    plt.ylabel('N datos')
+    #To set the legend on the plot we have used plt.legend()
+    plt.legend([background, signal],['background', 'signal'])
+    #To show the plot finally we have used plt.show().
+    plt.show()
