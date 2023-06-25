@@ -11,11 +11,11 @@ signals:
 backgrounds:
   QCD: background/qcd.root
   TOP: background/top.root
-  #Wjets: background/wjets_strong_sh227.root
-  #Zjets: background/zjets_strong_sh227.root
-  #Zjj: background/zjets_ewk.root
-  #Wjj: background/wjets_ewk.root
-  #diboson: ../../samples/DPJ/v02-00/abcd-samples-newdef/diboson.root
+  Wjets: background/wjets_strong_sh227.root
+  Zjets: background/zjets_strong_sh227.root
+  Zjj: background/zjets_ewk.root
+  Wjj: background/wjets_ewk.root
+  diboson: background/diboson.root
 
 recover_branches:       #Unidades que debería ser     
   - njet30  
@@ -45,27 +45,43 @@ detector_consts :
   lum: 140 # Luminosity @ LHC Run-2 (fb-1)
 
 
-cuts:            #[min, max]          #Units  
+cuts:            #[min, max]          #Units 
+  mjj: [1000000, .inf] 
+  njet30: [1, .inf]
+  dphijj: [-2.5, 2.5] # asi lo tienen los k
+  metTrig: True
+  # nLJmus20: 0
   # nLJjets20: [1, .inf]                
-  MET: [225000, .inf]
-  mjj: [1000000, .inf]           
-  # njet30: [1, .inf]        
-  # detajj: [3, .inf]         
-  jet1_pt: [90000, .inf]         
-  # LJjet1_gapRatio: [0.9, .inf] 
-  #LJjet1_BIBtagger: [0.2, .inf]        
+  # MET: [225000, .inf]         
+  # jet1_pt: [90000, .inf]      #Corte profe
+  # LJjet1_isoID: [-.inf, 2000]        #Corte profe    
+  # detajj: [3, .inf]         # y guardar los de -3 a -inf
+  # LJjet1_BIBtagger: [0.2, .inf] 
+  # LJjet1_gapRatio: [0.9, .inf]    
   # LJjet1_jvt: [-.inf, 0.4]       
-  #LJjet1_DPJtagger: [0.5 , 0.95] 
-  # dphijj: [-.inf, 2.5] 
-  LJjet1_isoID: [-.inf, 2000]        
-
+  # LJjet1_DPJtagger: [0.95, .inf]      #asi lo tienen los k 
+  # nLJmus20: [-0.00001,  0.00001]      #Esto se hace para == 0 
+  
+  
+  #neleSignal: [-0.00001,  0.00001]    #LEPTON VETO
+  #nmuSignal:  [-0.00001,  0.00001]    #LEPTON VETO
+  #hasBjet: [-0.00001,  0.00001]
+  #min_dphi_jetmet: [0.4, .inf]
   # LJjet1_timing: [-.inf, 4]     
+
+
+
+
+  # repetidos
+  # LJjet1_DPJtagger: [0.5 , 0.95] 
+  # dphijj: [-.inf, 2.5] 
+
   
   
   # NOS QUEDAMOS SIN DATOS  
-  #nmuSignal: [0, .inf]            #min
-  #nLJmus20: [0, .inf]           #min
-  #neleSignal: [0 , .inf]            #min
+  # nmuSignal: [-0.1, 0.1]            #min
+  # nLJmus20: [-0.1, 0.1]           #min
+  # neleSignal: [-0.1, 0.1]            #min
 
 
   # NO EXISTEN / NO SABEMOS COMO INTERPRETARLO / NO SABEMOS SI ES CORTE MAYOR O MENOR
@@ -79,7 +95,29 @@ scale_variable:
   mjj: 0.001   
   MET: 0.001  
   jet1_pt: 0.001
-  LJjet1_isoID: 0.001
+  LJjet1_isoID: 1
+  dphijj: 1
+  LJjet1_BIBtagger: 1
+  njet30: 1
+  detajj: 1
+  LJjet1_DPJtagger: 1
+  LJjet1_jvt: 1
+  LJjet1_gapRatio: 1
+  LJjet1_timing: 1
+  nmuSignal: 1
+  nLJmus20: 1
+  neleSignal: 1
+  min_dphi_jetmet: 1
+  hasBjet: 1
+  nLJjets20: 1
+# scale_variable:
+#   mjj: 1
+#   MET: 1  
+#   jet1_pt: 1
+#   LJjet1_isoID: 1
+#   dphijj: 1
+#   LJjet1_BIBtagger: 1
+
 
 
 ######################################################################

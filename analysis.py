@@ -470,10 +470,11 @@ def find_best_cut(df_all, variable, method):
         eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')["eficiencias"]
 
         # calculo el background rejection de todos los background
-        bk_rejection = calc_bk_rejection(df_all, variable).query('origin=="background"')["bk_rejection"]
+        bk_rejection = calc_bk_rejection(df_all, variable) #.query('origin=="background"')
+        bk_rejection_bk = bk_rejection["bk_rejection"]
 
         # calculo el punto de intersección promedio entre la significancia y los bk_rejection
-        promedio_mejor_corte = bk_rejection.groupby("df_name") \
+        promedio_mejor_corte = bk_rejection_bk.groupby("df_name") \
                                             .apply(lambda nk_rejection_i: (abs(nk_rejection_i.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))).idxmin()) \
                                             .apply(lambda id_minimo: bk_rejection["cortes"][id_minimo]) \
                                             .mean()

@@ -50,17 +50,17 @@ cuts:            #[min, max]          #Units
   njet30: [1, .inf]
   dphijj: [-2.5, 2.5] # asi lo tienen los k
   metTrig: True
-  #nLJmus20: 0
-  # # nLJjets20: [1, .inf]                
-  # # MET: [225000, .inf]         
-  # # jet1_pt: [90000, .inf]      #Corte profe
-  # # LJjet1_isoID: [-.inf, 2000]        #Corte profe    
-  # # detajj: [3, .inf]         # y guardar los de -3 a -inf
-  # # LJjet1_BIBtagger: [0.2, .inf] 
-  # # LJjet1_gapRatio: [0.9, .inf]    
-  # # LJjet1_jvt: [-.inf, 0.4]       
-  # # LJjet1_DPJtagger: [0.95, .inf]      #asi lo tienen los k 
-  # # nLJmus20: [-0.00001,  0.00001]      #Esto se hace para == 0 
+  nLJmus20: 0
+  nLJjets20: [1, .inf]                
+  MET: [225000, .inf]         
+  jet1_pt: [90000, .inf]      #Corte profe
+  LJjet1_isoID: [-.inf, 2000]        #Corte profe    
+  detajj: [3, .inf]         # y guardar los de -3 a -inf
+  LJjet1_BIBtagger: [0.2, .inf] 
+  LJjet1_gapRatio: [0.9, .inf]    
+  LJjet1_jvt: [-.inf, 0.4]       
+  LJjet1_DPJtagger: [0.95, .inf]      #asi lo tienen los k 
+  # nLJmus20: [-0.00001,  0.00001]      #Esto se hace para == 0 
   
   
   #neleSignal: [-0.00001,  0.00001]    #LEPTON VETO
