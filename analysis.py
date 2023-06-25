@@ -140,6 +140,10 @@ def do_cuts(df_all, cuts, scale):
 
         numero_eventos_despues = df_all.query('df_name == @name_signal').shape[0]
         print(f'Numero eventos antes: {numero_eventos_despues} \n')
+    
+    # elimino los pesos negativos
+    # weights = df_all["intLumi"]*df_all["scale1fb"]
+    df_all = df_all[df_all["intLumi"]*df_all["scale1fb"] >= 0]
              
     return df_all
 
@@ -469,9 +473,6 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     ############## PIE PLOT ####################
     # df_all.groupby(level='origin').size().plot(kind='pie', autopct='%1.1f%%', startangle=90)
     # plt.show()
-
-    ############## SIGNIFICANCIA A TRAVES DE LOS CORTES #################
-    # sns.barplo()
     
 
 ################################################################################
@@ -571,8 +572,8 @@ def test_cuts(df_all, cuts, scale):
         # 'n_datos': n_datos,
         'n_datos_background': n_datos_background,
         'n_datos_signal': n_datos_signal,
-        'eficiencias': eficiencias,
-        'significancias': significancias
+        'eficiencias': np.round(eficiencias, 3),
+        'significancias': np.round(significancias, 3)
     })
 
     ####### STACKED ############
@@ -590,22 +591,36 @@ def test_cuts(df_all, cuts, scale):
     plt.xticks(x + w /2, df_data['variables'], rotation='vertical')
 
     cmap_rojo =plt.get_cmap("Reds")
+    cmap_azul =plt.get_cmap("Blues")
 
-    valores_normalizados_signal = (df_data['n_datos_signal']) / (df_data['n_datos_background'].max())
+    valores_normalizados_signal = (df_data['n_datos_signal']) / (df_data['n_datos_signal'].max())
     valores_normalizados_background = (df_data['n_datos_background']) / (df_data['n_datos_background'].max())
 
-    cmap_rojo_signal = cmap_rojo(valores_normalizados_signal)
+    cmap_azul_signal = cmap_azul(valores_normalizados_signal)
     cmap_rojo_background = cmap_rojo(valores_normalizados_background)
 
-    background =ax1.bar(x, df_data['n_datos_background'], width=w, color=cmap_rojo_background, align='center')
-    #The trick is to use two different axes that share the same x axis, we have used ax1.twinx() method.
-    ax2 = ax1.twinx()
-    #We have calculated GDP by dividing gdpPerCapita to population.
-    signal =ax2.bar(x + w, df_data['n_datos_signal'], width=w,color=cmap_rojo_signal,align='center')
+    # creo las barras del background
+    background =ax1.bar(x, df_data['n_datos_background'], width=w, color=cmap_rojo_background, align='center', yerr=1/np.sqrt(df_data['n_datos_background']))
     
-    # pongo los label de cada barra 
-    bars = ax1.bar(x, eficiencias)
-    ax1.bar_label(bars, label_type='edge')
+    # pongo los label de cada barra
+    ax1.bar_label(background, labels=df_data['significancias'], label_type='edge', padding=40)
+    ax1.bar_label(background, labels=df_data['eficiencias'], label_type='edge', padding=20)
+    
+    # pongo los porcentajes al centro
+    porcentaje_signal = np.round((df_data['n_datos_signal']/(df_data['n_datos_signal'] + df_data['n_datos_background']) )*100, 1)
+    porcentaje_background = np.round((df_data['n_datos_background']/(df_data['n_datos_signal'] + df_data['n_datos_background']) )*100, 1)
+    ax1.bar_label(background, labels=porcentaje_background, label_type='center')
+
+    # creo las barras de la señal
+    ax2 = ax1.twinx()
+    signal =ax2.bar(x + w, df_data['n_datos_signal'], width=w, color=cmap_azul_signal, align='center', yerr=1/np.sqrt(df_data['n_datos_signal']))
+    
+    # pongo el porcentaje del centro de signal
+    ax2.bar_label(signal, labels=porcentaje_signal, label_type='center')
+
+    # pongo los ejes logaritmicos
+    ax1.set_yscale('log')
+    ax2.set_yscale('log')
 
     #Set the Y axis label as GDP.
     plt.ylabel('N datos')
