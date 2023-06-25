@@ -1,6 +1,6 @@
 signals:
   VBF_500757: signal/frvz_vbf_500757.root
-  # VBF_500758: signal/frvz_vbf_500758.root
+  #VBF_500758: signal/frvz_vbf_500758.root
   # VBF_500759: signal/frvz_vbf_500759.root
   # VBF_500760: signal/frvz_vbf_500760.root
   # VBF_500761: signal/frvz_vbf_500761.root
@@ -11,11 +11,11 @@ signals:
 backgrounds:
   QCD: background/qcd.root
   TOP: background/top.root
-  Wjets: background/wjets_strong_sh227.root
-  Zjets: background/zjets_strong_sh227.root
-  Zjj: background/zjets_ewk.root
-  Wjj: background/wjets_ewk.root
-  diboson: background/diboson.root
+  # Wjets: background/wjets_strong_sh227.root
+  # Zjets: background/zjets_strong_sh227.root
+  # Zjj: background/zjets_ewk.root
+  # Wjj: background/wjets_ewk.root
+  # diboson: background/diboson.root
 
 recover_branches:       #Unidades que debería ser     
   - njet30  
@@ -38,7 +38,8 @@ recover_branches:       #Unidades que debería ser
   - LJjet1_jvt          #Sin unidades
   - LJjet1_isoID
   - nLJjets20
-  - jet1_pt             #(GeV)
+  - jet1_pt
+  #- types            #(GeV) ESTO VERLO BIEN
 
 detector_consts :
   mevGev: 1000  
@@ -47,19 +48,20 @@ detector_consts :
 
 cuts:            #[min, max]          #Units 
   mjj: [1000000, .inf] 
-  njet30: [1, .inf]
+  njet30: [2, .inf]
   dphijj: [-2.5, 2.5] # asi lo tienen los k
   metTrig: True
-  nLJmus20: 0
-  nLJjets20: [1, .inf]                
-  MET: [225000, .inf]         
-  jet1_pt: [90000, .inf]      #Corte profe
-  LJjet1_isoID: [-.inf, 2000]        #Corte profe    
-  detajj: [3, .inf]         # y guardar los de -3 a -inf
-  LJjet1_BIBtagger: [0.2, .inf] 
-  LJjet1_gapRatio: [0.9, .inf]    
-  LJjet1_jvt: [-.inf, 0.4]       
-  LJjet1_DPJtagger: [0.95, .inf]      #asi lo tienen los k 
+  # nLJmus20: 0
+  #types: 0
+  # nLJjets20: [1, .inf]                
+  # MET: [225000, .inf]         
+  # jet1_pt: [90000, .inf]      #Corte profe
+  # LJjet1_isoID: [-.inf, 2000]        #Corte profe    
+  # detajj: [3, .inf]         # y guardar los de -3 a -inf
+  # LJjet1_BIBtagger: [0.2, .inf] 
+  # LJjet1_gapRatio: [0.9, .inf]    
+  # LJjet1_jvt: [-.inf, 0.4]       
+  # LJjet1_DPJtagger: [0.95, .inf]      #asi lo tienen los k 
   # nLJmus20: [-0.00001,  0.00001]      #Esto se hace para == 0 
   
   

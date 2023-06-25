@@ -428,8 +428,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     
     
     
-    plt.savefig('complete_Graph1_MET.eps', format = 'eps')
-    plt.savefig('complete_Graph1_MET.pdf', format = 'pdf')
+    #plt.savefig('complete_Graph1_MET.eps', format = 'eps')
+    #plt.savefig('complete_Graph1_MET.pdf', format = 'pdf')
     #plt.legend()
     plt.show()
 
@@ -447,36 +447,23 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 ############################### FIND BEST CUT ##################################
 ################################################################################
 
-# funcion para encontrar los mejores cortes utilizando significancia y/o eficiencias
+
 def find_best_cut(df_all, variable, method):
-    
-    # usamos la significancia para encontrar el mejor corte
     if method == "significancia":
-
-        # calculo los cortes y respectivas significancias 
         cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
-        
-        # encuentro el indice el maximo valor
         index_max_significance = significancia_variable.index(max(significancia_variable))
-
-        # tomo el corte con el máximo valor
         maximo_corte = cortes[index_max_significance]
         return maximo_corte
         
-    # usamos la eficiencia para encontrar los mejores cortes
     if method == "eficiencia":
-
-        # calculo la significancia de la señal
         eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')["eficiencias"]
 
-        # calculo el background rejection de todos los background
-        bk_rejection = calc_bk_rejection(df_all, variable) #.query('origin=="background"')
+        bk_rejection = calc_bk_rejection(df_all, variable)
         bk_rejection_bk = bk_rejection["bk_rejection"]
 
-        # calculo el punto de intersección promedio entre la significancia y los bk_rejection
         promedio_mejor_corte = bk_rejection_bk.groupby("df_name") \
-                                            .apply(lambda nk_rejection_i: (abs(nk_rejection_i.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))).idxmin()) \
-                                            .apply(lambda id_minimo: bk_rejection["cortes"][id_minimo]) \
-                                            .mean()
+                                                .apply(lambda nk_rejection_i: (abs(nk_rejection_i.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))).idxmin()) \
+                                                .apply(lambda id_minimo: bk_rejection["cortes"][id_minimo]) \
+                                                .mean()
         
         return promedio_mejor_corte
