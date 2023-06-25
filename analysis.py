@@ -456,8 +456,10 @@ def find_best_cut(df_all, variable, method):
         # calculo los cortes y respectivas significancias 
         cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
         
-        # 
+        # encuentro el indice el maximo valor
         index_max_significance = significancia_variable.index(max(significancia_variable))
+
+        # tomo el corte con el máximo valor
         maximo_corte = cortes[index_max_significance]
         return maximo_corte
         
