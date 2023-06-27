@@ -331,10 +331,10 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         eje_significancia = axes[1]
 
 
-    ################## MODIFICACION DATOS PARA GRAFICAR ##########################
+    ################## MODIFICACIÓN DATOS PARA GRAFICAR ##########################
 
 
-    # pocentajes 
+    # porcentajes 
     porcentaje_bajo = 0.02
     porcentaje_alto = 0.98
 
@@ -420,7 +420,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         
         ######################### REJECTION ##########################
 
-        # calculo y grafico el background rejection de signal
+        # calculo y gráfico el background rejection de signal
         bk_rejection_background = calc_bk_rejection(df_all, variable).query('origin == "background"')
         sns.scatterplot(data=bk_rejection_background, 
                         x="cortes", 
@@ -454,7 +454,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         # std = np.std(eficiencia_variable)
         plt.errorbar(x = eficiencias_signal["cortes"], 
                      y = eficiencias_signal["eficiencias"], 
-                     yerr = np.sqrt(1/eficiencias_signal["n_datos"]), # multiplicar por desviacion estandar?, tendría que guardarla en la funcion de las eficiencias
+                     yerr = np.sqrt(1/eficiencias_signal["n_datos"]), # multiplicar por desviación estandar?, tendría que guardarla en la funcion de las eficiencias
                      fmt='none', 
                      linestyle='none')
         #plt.xlim(0,1000)
