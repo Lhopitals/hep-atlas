@@ -52,7 +52,7 @@ if __name__ == '__main__':
     ########################################################
 
     df_all = read_datasets(signals, backgrounds, variables, scales, path)
-    print(df_all)
+    #print(df_all)
 
     ########################################################
     ####################### CORTES #########################
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #df_bk = calc_bk_rejection(df_all_cut)
     #print(df_bk.shape)
 
-    variable = "MET"
+    variable = "dphijj"
 
     ########################################################
     ####################### GRÁFICOS #######################
