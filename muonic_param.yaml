@@ -1,8 +1,8 @@
 signals:
-  #VBF_500757: signal/frvz_vbf_500757.root
-  #VBF_500758: signal/frvz_vbf_500758.root
+  # VBF_500757: signal/frvz_vbf_500757.root
+  VBF_500758: signal/frvz_vbf_500758.root
   # VBF_500759: signal/frvz_vbf_500759.root
-   VBF_500760: signal/frvz_vbf_500760.root
+  # VBF_500760: signal/frvz_vbf_500760.root
   # VBF_500761: signal/frvz_vbf_500761.root
   # VBF_500762: signal/frvz_vbf_500762.root
   # VBF_500763: signal/frvz_vbf_500763.root
@@ -11,11 +11,11 @@ signals:
 backgrounds:
   QCD: background/qcd.root
   TOP: background/top.root
-  # Wjets: background/wjets_strong_sh227.root
-  # Zjets: background/zjets_strong_sh227.root
-  # Zjj: background/zjets_ewk.root
-  # Wjj: background/wjets_ewk.root
-  # diboson: background/diboson.root
+  Wjets: background/wjets_strong_sh227.root
+  Zjets: background/zjets_strong_sh227.root
+  Zjj: background/zjets_ewk.root
+  Wjj: background/wjets_ewk.root
+  diboson: background/diboson.root
 
 recover_branches:       #Unidades que debería ser     
   - njet30  
@@ -40,7 +40,7 @@ recover_branches:       #Unidades que debería ser
   - nLJjets20
   - jet1_pt
   - LJ1_type
-  - LJjet1_centrality
+  - LJmu1_centrality
   - LJmu1_isGood
   - LJjet1_charge
   #- LJmu1_mu1DNNscore
@@ -56,18 +56,18 @@ cuts:
   mjj: [1000000, .inf]                #VBF FILTER: MJJ
   njet30: [2, .inf]                   #VBF FILTER: JETS >= 2
   detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj 
-  #dphijj: [-2.5, 2.5]                 #Abs Dphijj 
-  #neleSignal: 0                       #LEPTON Veto
-  #nmuSignal: 0                        #LEPTON Veto
-  #hasBjet: 0                          #B-jet Veto
-  #LJ1_type: 0                         #Mu-DPJ Selection
-  # metTrig: True                       #MET Trigger
-  # MET: [100000, .inf]                 #MET
-  # LJmu1_isGood: 1                     #No sé como tomarlo
-  # LJjet1_centrality: [0.7, .inf]      #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
+  dphijj: [-2.5, 2.5]                 #Abs Dphijj 
+  neleSignal: 0                       #LEPTON Veto
+  nmuSignal: 0                        #LEPTON Veto
+  hasBjet: 0                          #B-jet Veto
+  LJ1_type: 0                         #Mu-DPJ Selection
+  metTrig: True                       #MET Trigger
+  MET: [100000, .inf]                 #MET
+  LJmu1_isGood: 1                     #No sé como tomarlo
+  LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
   # LJjet1_charge: 0                    #ABCD SR:  mu DPJ1Charge    ACÁ DAN LOS PESOS NEGATIVOS
   # LJjet1_isoID: [0, 2000]             #ABCD ST: muDPJ1 isoID
-  # LJmu1_mu1DNNscoreo LJmuon_DNNscore :[0.5, .inf]  
+  # LJmu1_mu1DNNscore o LJmuon_DNNscore :[0.5, .inf]  
   
   #PREGUNTAR SI jet1 = mu1 o si 
   #PREGUNTAR SI FALTA EL LJmuon_eta o ETAZ o\ABS(ETA) o LJjet_eta o jet1_eta o truthEta
@@ -86,7 +86,7 @@ scale_variable:
   MET: 0.001
   #LJmu1_mu1DNNscore: 1
   LJmu1_isGood: 1
-  LJjet1_centrality: 1
+  LJmu1_centrality: 1
   LJjet1_charge: 1  
   LJjet1_isoID: 0.001
   

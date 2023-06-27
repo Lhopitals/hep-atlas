@@ -40,6 +40,7 @@ recover_branches:       #Unidades que debería ser
   - nLJjets20
   - jet1_pt             #(GeV)
   - LJ1_type
+  
 detector_consts :
   mevGev: 1000  
   lum: 140 # Luminosity @ LHC Run-2 (fb-1)
