@@ -11,11 +11,11 @@ signals:
 backgrounds:
   QCD: background/qcd.root
   TOP: background/top.root
-  # Wjets: background/wjets_strong_sh227.root
-  # Zjets: background/zjets_strong_sh227.root
-  # Zjj: background/zjets_ewk.root
-  # Wjj: background/wjets_ewk.root
-  # diboson: background/diboson.root
+  Wjets: background/wjets_strong_sh227.root
+  Zjets: background/zjets_strong_sh227.root
+  Zjj: background/zjets_ewk.root
+  Wjj: background/wjets_ewk.root
+  diboson: background/diboson.root
 
 recover_branches:       #Unidades que debería ser     
   - njet30  

@@ -40,7 +40,7 @@ recover_branches:       #Unidades que debería ser
   - nLJjets20
   - jet1_pt
   - LJ1_type
-  - LJjet1_centrality
+  - LJmu1_centrality
   - LJmu1_isGood
   - LJjet1_charge
   #- LJmu1_mu1DNNscore
@@ -63,8 +63,8 @@ cuts:
   LJ1_type: 0                         #Mu-DPJ Selection
   metTrig: True                       #MET Trigger
   MET: [100000, .inf]                 #MET
-  # LJmu1_isGood: 1                     #No sé como tomarlo
-  # LJjet1_centrality: [0.7, .inf]      #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
+  LJmu1_isGood: 1                     #No sé como tomarlo
+  LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
   # LJjet1_charge: 0                    #ABCD SR:  mu DPJ1Charge    ACÁ DAN LOS PESOS NEGATIVOS
   # LJjet1_isoID: [0, 2000]             #ABCD ST: muDPJ1 isoID
   # LJmu1_mu1DNNscore o LJmuon_DNNscore :[0.5, .inf]  
@@ -86,7 +86,7 @@ scale_variable:
   MET: 0.001
   #LJmu1_mu1DNNscore: 1
   LJmu1_isGood: 1
-  LJjet1_centrality: 1
+  LJmu1_centrality: 1
   LJjet1_charge: 1  
   LJjet1_isoID: 0.001
   

@@ -31,8 +31,8 @@ if __name__ == '__main__':
     #data_yaml = read_data_yaml('previous_data_muon.yaml')  #De prueba para muonic
     #data_yaml = read_data_yaml('previous_data_calo.yaml')  #De prueba para muonic
 
-    #data_yaml = read_data_yaml('muonic_param.yaml')    #Parámetros del muonic
-    data_yaml = read_data_yaml('muonic_param.yaml')      #Parámetros del calo
+    data_yaml = read_data_yaml('muonic_param.yaml')    #Parámetros del muonic
+    #data_yaml = read_data_yaml('calo_param.yaml')      #Parámetros del calo
 
     # de data_yaml obtenemos los nombres de los datasets
     signals = data_yaml['signals'].values() #esto devuelve solo los valores de cada variable.
