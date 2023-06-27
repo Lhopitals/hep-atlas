@@ -517,6 +517,7 @@ def test_cuts(df_all, cuts, scale):
     n_datos = []
     n_datos_signal = []
     n_datos_background = []
+    peso_signal = []
 
     significancias.append(significance(df_all))
     eficiencias.append(efficiency(df_all, df_all))
@@ -525,6 +526,12 @@ def test_cuts(df_all, cuts, scale):
     n_datos.append(df_all.shape[0])
     n_datos_signal.append(df_all.query('origin=="signal"').shape[0])
     n_datos_background.append(df_all.query('origin=="background"').shape[0])
+    peso_signal.append((df_all.query('origin=="signal"')["intLumi"]*df_all.query('origin=="signal"')["scale1fb"]).sum())
+
+    print(f'datos antes corte: {n_datos[-1]}')
+    print(f'datos background antes corte: {n_datos_background[-1]}')
+    print(f'datos signal antes corte: {n_datos_signal[-1]}')
+    print(f'peso signal antes corte: {peso_signal[-1]} \n')
 
     # se aplican todos los cortes
     for variable in cuts:
@@ -565,6 +572,13 @@ def test_cuts(df_all, cuts, scale):
         n_datos.append(df_all.shape[0])
         n_datos_signal.append(df_all.query('origin=="signal"').shape[0])
         n_datos_background.append(df_all.query('origin=="background"').shape[0])
+        peso_signal.append((df_all.query('origin=="signal"')["intLumi"]*df_all.query('origin=="signal"')["scale1fb"]).sum())
+
+
+        print(f'datos despues corte: {n_datos[-1]}')
+        print(f'datos background despues corte: {n_datos_background[-1]}')
+        print(f'datos signal despues corte: {n_datos_signal[-1]}')
+        print(f'peso signal despues corte: {peso_signal[-1]} \n')
     
     df_data = pd.DataFrame({
         'cortes': cortes,
