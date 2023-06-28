@@ -81,6 +81,7 @@ cuts:
   dphijj: [-.inf, 2.048]                #max Delta phi (jet,jet) 
   min_dphi_jetmet: [0.32, .inf]        #min Delta phi(jet, MET)
   MET: [220000, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
+  # MET: [220, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
   LJjet1_timing: [-.inf, 6]           #max caloDPJ1 timing
   LJjet1_gapRatio: [0.91, .inf]        #min caloDPJ1 gap ratio
   LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
