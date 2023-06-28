@@ -1,0 +1,134 @@
+signals:
+  VBF_500757: signal/frvz_vbf_500757.root
+  # VBF_500758: signal/frvz_vbf_500758.root
+  # VBF_500759: signal/frvz_vbf_500759.root
+  # VBF_500760: signal/frvz_vbf_500760.root
+  # VBF_500761: signal/frvz_vbf_500761.root
+  # VBF_500762: signal/frvz_vbf_500762.root
+  # VBF_500763: signal/frvz_vbf_500763.root
+  # VBF_500764: signal/frvz_vbf_500764.root
+  
+backgrounds:
+  QCD: background/qcd.root
+  TOP: background/top.root
+  Wjets: background/wjets_strong_sh227.root
+  Zjets: background/zjets_strong_sh227.root
+  Zjj: background/zjets_ewk.root
+  Wjj: background/wjets_ewk.root
+  diboson: background/diboson.root
+
+recover_branches:       #Unidades que debería ser     
+  - njet30  
+  - mjj                 #(GeV)                       
+  - detajj              #Sin unidades (ángulo)
+  - dphijj              #Sin unidades (ángulo)
+  - min_dphi_jetmet     #(GeV) creo
+  - LJjet1_gapRatio 
+  - LJjet1_BIBtagger    #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
+  - MET                 #(GeV)
+  - neleSignal          #N de señal
+  - nmuSignal           #N de señal
+  - metTrig
+  - scale1fb            #Escala luminosidad Femto-barn?
+  - intLumi             #Escala luminosidad Femto-barn?
+  - hasBjet
+  - nLJmus20
+  - LJjet1_timing
+  - LJjet1_DPJtagger   #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
+  - LJjet1_jvt          #Sin unidades
+  - LJjet1_isoID
+  - nLJjets20
+  - jet1_pt             #(GeV)
+  - LJ1_type
+  
+detector_consts :
+  mevGev: 1000  
+  lum: 140 # Luminosity @ LHC Run-2 (fb-1)
+
+
+# cuts:   
+#   #Cortes con respecto a la nota.        
+#   #Corte:           #Valor:           #Comentarios: 
+#   #SE CAMBIA EL  NJ30 PORQUE NO ESTÁ TOMANDO LOS IGUALES A 2. PERO COMO SON DISCRETOS 
+#   #SE PUEDE TOMAR EL 1.     
+#   njet30: [1, .inf]                   #VBF FILTER: JETS >= 2  Falta el que esto se cumple con P_t > 30
+#   detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj 
+#   mjj: [1000000, .inf]                #VBF FILTER: MJJ
+
+#   dphijj: [-.inf, 2.5]                #max Delta phi (jet,jet) 
+#   neleSignal: 0                       #LEPTON Veto
+#   nmuSignal: 0                        #LEPTON Veto
+#   hasBjet: 0                          #B-jet Veto ES EL MISMO QUE EL b miniscula?????
+#   LJ1_type: 2                         #Calo-DPJ Selection
+#   metTrig: True                       #MET Trigger
+  
+#   # MET: [225000, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
+#   min_dphi_jetmet: [0.4, .inf]        #min Delta phi(jet, MET)
+#   LJjet1_timing: [-.inf, 4]           #max caloDPJ1 timing
+#   LJjet1_gapRatio: [0.9, .inf]        #min caloDPJ1 gap ratio
+#   LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
+#   LJjet1_jvt: [-.inf, 0.4]            #max caloDPJ1 JVT
+#   LJjet1_DPJtagger: [0.5, .inf]       #min caloDPJ1 caloDPJtagger
+#   # ######LJjet1_DPJtagger: [0.9, 1]          #ABCD SR calo DPJ1 caloDPJtagger
+#   # LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
+
+
+# cortes mijail
+cuts:   
+  #Cortes con respecto a la nota.        
+  #Corte:           #Valor:           #Comentarios:
+
+    # lo que llaman VBF filter
+  ######### cambio que se arreglo, no parte de 1, sino de 2
+  njet30: [1, .inf]                   #VBF FILTER: JETS >= 2  Falta el que esto se cumple con P_t > 30
+  detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj 
+  mjj: [1000000, .inf]                #VBF FILTER: MJJ
+
+
+  # dphijj: [-.inf, 2.048]                #max Delta phi (jet,jet) 
+  dphijj: [-2.048, 2.048]                #max Delta phi (jet,jet) # asi lo tiene mijail <- REVISAR
+  min_dphi_jetmet: [0.32, .inf]        #min Delta phi(jet, MET)
+  
+  neleSignal: 0                       #LEPTON Veto
+  nmuSignal: 0                        #LEPTON Veto
+  hasBjet: 0                          #B-jet Veto ES EL MISMO QUE EL b miniscula?????
+
+  metTrig: True                       #MET Trigger
+  MET: [220000, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
+
+  LJjet1_timing: [-.inf, 6]           #max caloDPJ1 timing
+  LJjet1_gapRatio: [0.91, .inf]        #min caloDPJ1 gap ratio
+  LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
+  LJjet1_jvt: [-.inf, 0.37]            #max caloDPJ1 JVT
+  
+  # LJjet1_DPJtagger: [0.5, .inf]       #min caloDPJ1 caloDPJtagger
+  LJjet1_DPJtagger: [0.96, .inf]       #min caloDPJ1 caloDPJtagger
+
+  LJ1_type: 2                         #Calo-DPJ Selection
+
+
+  
+
+  # LJjet1_DPJtagger: [0.9, 1]          #ABCD SR calo DPJ1 caloDPJtagger
+  LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
+
+  # compuestas
+  # 
+
+
+scale_variable:
+  njet30: 1
+  detajj: 1
+  mjj: 0.001
+  dphijj: 1
+  neleSignal: 1
+  nmuSignal: 1
+  hasBjet: 1
+  MET: 0.001
+  min_dphi_jetmet: 1
+  LJjet1_timing: 1
+  LJjet1_gapRatio: 1
+  LJjet1_BIBtagger: 1 
+  LJjet1_jvt: 1
+  LJjet1_DPJtagger: 1
+  LJjet1_isoID: 0.001
