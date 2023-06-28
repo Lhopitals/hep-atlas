@@ -533,9 +533,13 @@ def test_cuts(df_all, cuts, scale):
     print(f'datos signal antes corte: {n_datos_signal[-1]}')
     print(f'peso signal antes corte: {peso_signal[-1]} \n')
 
+    # si se queda vacío puedo usar este para devolver las etiquetas
+    df_recover_bk = df_all.query('origin=="background"').iloc[:2]*0 
+    df_recover_sg = df_all.query('origin=="signal"').iloc[:2]*0
+
     # se aplican todos los cortes
     for variable in cuts:
-        
+
         #Definimos si el corte es un booleano. Se ocupa cuando se quieren cortar cosas del estilo Triggers
         if type(cuts[variable]) == type(True):
             print(f'Corte: {variable} == {cuts[variable]}')
@@ -565,6 +569,25 @@ def test_cuts(df_all, cuts, scale):
         else:
             print("ADVERTENCIA: NO TOMA LA VARIABLE DEL CORTE")
              
+    
+        #
+        # si alguno queda vacío vuelvo a poner elementos con las etiquetas, pero de valor 0, y después paro el código
+        #
+
+        df_signal = df_all.query('origin == "signal"')
+        df_background = df_all.query('origin == "background"')
+
+        if df_signal.empty:
+            # No hay datos de señal
+            print("Quedamos sin datos de señal")
+            df_all = pd.concat([df_all, df_recover_sg])
+
+        if df_background.empty:
+            # No hay datos de background
+            print("Quedamos sin datos de background")
+            df_all = pd.concat([df_all, df_recover_bk])
+
+        # guardamos los datos
         significancias.append(significance(df_all))
         eficiencias.append(efficiency(df_original, df_all))
         cortes.append(df_all[variable])
@@ -574,10 +597,20 @@ def test_cuts(df_all, cuts, scale):
         n_datos_background.append(df_all.query('origin=="background"').shape[0])
         peso_signal.append((df_all.query('origin=="signal"')["intLumi"]*df_all.query('origin=="signal"')["scale1fb"]).sum())
 
+        # se para el código
+        if df_signal.empty:
+            break
+
+        if df_background.empty:
+            break
+
         # print(f'datos despues corte: {n_datos[-1]}')
         # print(f'datos background despues corte: {n_datos_background[-1]}')
         # print(f'datos signal despues corte: {n_datos_signal[-1]}')
         # print(f'peso signal despues corte: {peso_signal[-1]} \n')
+
+        
+
     
     df_data = pd.DataFrame({
         #'cortes': cortes,
