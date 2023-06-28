@@ -22,9 +22,6 @@ recover_branches:       #Unidades que debería ser
   - mjj                 #(GeV)                       
   - detajj              #Sin unidades (ángulo)
   - dphijj              #Sin unidades (ángulo)
-  - min_dphi_jetmet     #(GeV) creo
-  - LJjet1_gapRatio 
-  - LJjet1_BIBtagger    #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
   - MET                 #(GeV)
   - neleSignal          #N de señal
   - nmuSignal           #N de señal
@@ -32,18 +29,14 @@ recover_branches:       #Unidades que debería ser
   - scale1fb            #Escala luminosidad Femto-barn?
   - intLumi             #Escala luminosidad Femto-barn?
   - hasBjet
-  - nLJmus20
-  - LJjet1_timing
-  - LJjet1_DPJtagger   #Los Tagger son maneras de agrupar o nombrar variables por lo que tampoco debería tener unidades.
-  - LJjet1_jvt          #Sin unidades
-  - LJjet1_isoID
   - nLJjets20
-  - jet1_pt
   - LJ1_type
   - LJmu1_centrality
   - LJmu1_isGood
-  - LJjet1_charge
+  # - LJjet1_charge
+  # - LJmu1_charge
   #- LJmu1_mu1DNNscore
+  # - LJjet1_isoID
 
 detector_consts :
   mevGev: 1000  
@@ -52,20 +45,25 @@ detector_consts :
 
 cuts:
   #Cortes con respecto a la nota.
-  #Corte:        #Valor:              #Comentarios:      
+  #Corte:        #Valor:              #Comentarios: 
+  njet30: [1, .inf]                   #VBF FILTER: JETS >= 2  #NO ESTÁ PESCANDO LOS QUE SON IGUALES A 2
+  detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj   
   mjj: [1000000, .inf]                #VBF FILTER: MJJ
-  njet30: [2, .inf]                   #VBF FILTER: JETS >= 2
-  detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj 
   dphijj: [-2.5, 2.5]                 #Abs Dphijj 
+
   neleSignal: 0                       #LEPTON Veto
   nmuSignal: 0                        #LEPTON Veto
+
   hasBjet: 0                          #B-jet Veto
-  LJ1_type: 0                         #Mu-DPJ Selection
   metTrig: True                       #MET Trigger
-  MET: [100000, .inf]                 #MET
-  LJmu1_isGood: 1                     #No sé como tomarlo
-  LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
-  # LJjet1_charge: 0                    #ABCD SR:  mu DPJ1Charge    ACÁ DAN LOS PESOS NEGATIVOS
+  MET: [100000, .inf]                 #MET  
+
+  #LJ1_type: 0                         #Mu-DPJ Selection
+
+  #LJmu1_isGood: 1                     #muDPJ quality cuts
+  #LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
+  
+  # LJmu1_charge: 0                    #ABCD SR:  mu DPJ1Charge    ACÁ DAN LOS PESOS NEGATIVOS
   # LJjet1_isoID: [0, 2000]             #ABCD ST: muDPJ1 isoID
   # LJmu1_mu1DNNscore o LJmuon_DNNscore :[0.5, .inf]  
   
@@ -87,6 +85,7 @@ scale_variable:
   #LJmu1_mu1DNNscore: 1
   LJmu1_isGood: 1
   LJmu1_centrality: 1
-  LJjet1_charge: 1  
-  LJjet1_isoID: 0.001
+  # LJjet1_charge: 1  
+  # LJjet1_isoID: 0.001
+  
   

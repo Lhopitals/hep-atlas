@@ -574,21 +574,23 @@ def test_cuts(df_all, cuts, scale):
         n_datos_background.append(df_all.query('origin=="background"').shape[0])
         peso_signal.append((df_all.query('origin=="signal"')["intLumi"]*df_all.query('origin=="signal"')["scale1fb"]).sum())
 
-
-        print(f'datos despues corte: {n_datos[-1]}')
-        print(f'datos background despues corte: {n_datos_background[-1]}')
-        print(f'datos signal despues corte: {n_datos_signal[-1]}')
-        print(f'peso signal despues corte: {peso_signal[-1]} \n')
+        # print(f'datos despues corte: {n_datos[-1]}')
+        # print(f'datos background despues corte: {n_datos_background[-1]}')
+        # print(f'datos signal despues corte: {n_datos_signal[-1]}')
+        # print(f'peso signal despues corte: {peso_signal[-1]} \n')
     
     df_data = pd.DataFrame({
-        'cortes': cortes,
+        #'cortes': cortes,
         'variables': variables,
         # 'n_datos': n_datos,
         'n_datos_background': n_datos_background,
         'n_datos_signal': n_datos_signal,
         'eficiencias': np.round(eficiencias, 3),
-        'significancias': np.round(significancias, 3)
+        'significancias': np.round(significancias, 3),
+        'weights': peso_signal
     })
+    
+    print(df_data)
 
     ####### STACKED ############
     # sns.barplot(data = df_data, x = "variables", y = "n_datos")
