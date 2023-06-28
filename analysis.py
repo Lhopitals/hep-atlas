@@ -155,9 +155,19 @@ def do_cuts(df_all, cuts, scale):
 # SIGNIFICANCE DEFINITION
 def significance(df_all):
 
-    # se calcula la significancia con la variable "intlumi"
-    signal_weight = (df_all.loc['signal']["intLumi"]*df_all.loc['signal']["scale1fb"]).sum()
-    backgrounds_weight = (df_all.loc['background']["intLumi"]*df_all.loc['background']["scale1fb"]).sum()
+    df_signal = df_all.query('origin == "signal"')
+    df_background = df_all.query('origin == "background"')
+    if df_signal.empty:
+        # No hay datos de señal
+        signal_weight = 0
+    else:
+        signal_weight = (df_all.loc['signal']["intLumi"]*df_all.loc['signal']["scale1fb"]).sum()
+
+    if df_background.empty:
+        # No hay datos de background
+        backgrounds_weight = np.nan
+    else:
+        backgrounds_weight = (df_all.loc['background']["intLumi"]*df_all.loc['background']["scale1fb"]).sum()
 
     # se calcula la significancia con la fórmula proporcionada
     return np.sqrt(2 * abs( (signal_weight + backgrounds_weight) * np.log(1 + (signal_weight/backgrounds_weight)) - signal_weight))
@@ -172,15 +182,21 @@ def barrido_significancia_variable(df_all, variable, derecha = True):
     valor_minimo = df_all.loc["signal"][variable].min()
     valor_maximo = df_all.loc["signal"][variable].max()
 
+    df_original = df_all
+
     # se realiza el barrido de cortes, y se calcula la significancia para cada corte
     for i in range(n_cuts):
         # hago un corte a signal que va aumentando en cada iteracion
         iteration_cut = valor_minimo + i*(valor_maximo-valor_minimo)/n_cuts
         
         if derecha==True:
-            df_all = df_all[df_all[variable]>iteration_cut]
+            df_all = df_original[df_original[variable]>iteration_cut]
         else:
-            df_all = df_all[df_all[variable]<iteration_cut]
+            df_all = df_original[df_original[variable]<iteration_cut]
+
+        # si me quedo sin datos en el signal paro la simulación
+        # if df_all.shape[0] == 0:
+        #     break
             
         # se calcula la significancia con los nuevos cortes
         significancia_i = significance(df_all)
@@ -226,8 +242,8 @@ def barrido_eficiencia_variable(df, variable, derecha = True):
             df_cut = df[df[variable]<iteration_cut]
 
         # si me quedo sin datos en el signal paro la simulación
-        if df.shape[0] == 0:
-            break
+        # if df.shape[0] == 0:
+        #     break
 
         # se calcula la significancia con los nuevos cortes
         eficiencia_i = efficiency(df, df_cut)
@@ -249,23 +265,23 @@ def barrido_eficiencia_variable(df, variable, derecha = True):
 
 
 
-def calc_eficiencias(df_all, variable):
+def calc_eficiencias(df_all, variable, derecha = True):
     df_eficiencias = df_all.groupby(["origin", "df_name"]) \
-                            .apply(lambda grupo: barrido_eficiencia_variable(grupo, variable))
+                            .apply(lambda grupo: barrido_eficiencia_variable(grupo, variable, derecha))
     return df_eficiencias
 
 
 
-def calc_bk_rejection(df_all, variable):
-    df_eficiencias = calc_eficiencias(df_all, variable)
+def calc_bk_rejection(df_all, variable, derecha = True):
+    df_eficiencias = calc_eficiencias(df_all, variable, derecha)
     df_eficiencias['bk_rejection'] = 1 - df_eficiencias['eficiencias']
     return df_eficiencias
 
 
 
-def calc_bk_rejection_all_background(df_all, variable):
+def calc_bk_rejection_all_background(df_all, variable, derecha = True):
     df_background = df_all.query('origin == "background"')
-    df_eficiencias = barrido_eficiencia_variable(df_background, variable)
+    df_eficiencias = barrido_eficiencia_variable(df_background, variable, derecha)
     df_eficiencias['bk_rejection'] = 1 - df_eficiencias['eficiencias']
     return df_eficiencias
 
@@ -291,7 +307,7 @@ def calc_weight(df):
 
 
 
-def graficar(df_all, variable, graficar_significancia = True, graficar_eficiencia = True, aplicar_weights = True):
+def graficar(df_all, variable, derecha = True, graficar_significancia = True, graficar_eficiencia = True, aplicar_weights = True):
 
     # configuraciones para el gráfico
     plt.rcParams.update(plt.rcParamsDefault)
@@ -343,8 +359,8 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
     high_data  = df_all.loc["signal"][variable].quantile(porcentaje_alto) 
     df_all = df_all[(df_all[variable]>low_data) & (df_all[variable]<high_data)]
 
-    best_cut_eficiencia = find_best_cut(df_all, variable, "eficiencia")
-    best_cut_significancia = find_best_cut(df_all, variable, "significancia")
+    best_cut_eficiencia = find_best_cut(df_all, variable, "eficiencia", derecha)
+    best_cut_significancia = find_best_cut(df_all, variable, "significancia", derecha)
 
 
     ################## GRAFICO DE SIGNIFICANCIA ##########################
@@ -352,7 +368,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
     if graficar_significancia == True:
         # calculo la significancia de la variable introducida
-        cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
+        cortes, significancia_variable = barrido_significancia_variable(df_all, variable, derecha)
         #Scatter de la significancia.
         scatter_significancia = sns.scatterplot(ax = eje_significancia, x = cortes, y = significancia_variable, marker=(8,2,0), color='coral', s=75) #Grafico pequeño
         scatter_significancia.set_xlabel(variable, fontdict={'size':12})
@@ -402,7 +418,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 
         ######################### EFICIENCIA ##########################
         
-        eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')
+        eficiencias_signal = calc_eficiencias(df_all, variable, derecha).query('origin=="signal"')
         scatter_eficiencia = sns.scatterplot(ax = eje_eficiencia, 
                                              data=eficiencias_signal, 
                                              x = "cortes", 
@@ -421,7 +437,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
         ######################### REJECTION ##########################
 
         # calculo y grafico el background rejection de signal
-        bk_rejection_background = calc_bk_rejection(df_all, variable).query('origin == "background"')
+        bk_rejection_background = calc_bk_rejection(df_all, variable, derecha).query('origin == "background"')
         sns.scatterplot(data=bk_rejection_background, 
                         x="cortes", 
                         y="bk_rejection", 
@@ -434,7 +450,7 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
                         )
 
         # calculo el background rejection de todos los backgrounds unidos
-        bk_rejection_all_background = calc_bk_rejection_all_background(df_all, variable)
+        bk_rejection_all_background = calc_bk_rejection_all_background(df_all, variable, derecha)
         sns.scatterplot(data=bk_rejection_all_background, 
                         x="cortes", 
                         y="bk_rejection", 
@@ -480,17 +496,17 @@ def graficar(df_all, variable, graficar_significancia = True, graficar_eficienci
 ################################################################################
 
 
-def find_best_cut(df_all, variable, method):
+def find_best_cut(df_all, variable, method, derecha = True):
     if method == "significancia":
-        cortes, significancia_variable = barrido_significancia_variable(df_all, variable)
+        cortes, significancia_variable = barrido_significancia_variable(df_all, variable, derecha)
         index_max_significance = significancia_variable.index(max(significancia_variable))
         maximo_corte = cortes[index_max_significance]
         return maximo_corte
         
     if method == "eficiencia":
-        eficiencias_signal = calc_eficiencias(df_all, variable).query('origin=="signal"')["eficiencias"]
+        eficiencias_signal = calc_eficiencias(df_all, variable, derecha).query('origin=="signal"')["eficiencias"]
 
-        bk_rejection = calc_bk_rejection_all_background(df_all, variable)
+        bk_rejection = calc_bk_rejection_all_background(df_all, variable, derecha)
         bk_rejection_bk = bk_rejection["bk_rejection"]
 
         diferencia = abs(bk_rejection_bk.reset_index(drop=True)-eficiencias_signal.reset_index(drop=True))

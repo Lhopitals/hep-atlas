@@ -73,7 +73,48 @@ detector_consts :
 #   # LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
 
 
-# cortes mijail
+# # cortes mijail
+# cuts:   
+#   #Cortes con respecto a la nota.        
+#   #Corte:           #Valor:           #Comentarios:
+
+#     # lo que llaman VBF filter
+#   ######### cambio que se arreglo, no parte de 1, sino de 2
+#   njet30: [1, .inf]                   #VBF FILTER: JETS >= 2  Falta el que esto se cumple con P_t > 30
+#   detajj: [3, .inf]                   #VBF FILTER: Delta Eta_jj 
+#   mjj: [1000000, .inf]                #VBF FILTER: MJJ
+
+
+#   # dphijj: [-.inf, 2.048]                #max Delta phi (jet,jet) 
+#   dphijj: [-2.048, 2.048]                #max Delta phi (jet,jet) # asi lo tiene mijail <- REVISAR
+  
+#   neleSignal: 0                       #LEPTON Veto
+#   nmuSignal: 0                        #LEPTON Veto
+#   hasBjet: 0                          #B-jet Veto ES EL MISMO QUE EL b miniscula?????
+
+#   LJ1_type: 2                         #Calo-DPJ Selection
+
+#   metTrig: True                       #MET Trigger
+  
+#   # MET: [220000, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
+#   MET: [160000, .inf]                 #MET CORTE POSIBLE PRESENTAR
+
+#   min_dphi_jetmet: [0.32, .inf]        #min Delta phi(jet, MET)
+
+#   LJjet1_timing: [-.inf, 6]           #max caloDPJ1 timing
+#   LJjet1_gapRatio: [0.91, .inf]        #min caloDPJ1 gap ratio
+#   LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
+#   LJjet1_jvt: [-.inf, 0.37]            #max caloDPJ1 JVT
+  
+#   # LJjet1_DPJtagger: [0.5, .inf]       #min caloDPJ1 caloDPJtagger
+#   LJjet1_DPJtagger: [0.96, .inf]       #min caloDPJ1 caloDPJtagger
+
+#   # LJjet1_DPJtagger: [0.9, 1]          #ABCD SR calo DPJ1 caloDPJtagger
+#   LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
+
+
+
+# cortes notas
 cuts:   
   #Cortes con respecto a la nota.        
   #Corte:           #Valor:           #Comentarios:
@@ -86,34 +127,30 @@ cuts:
 
 
   # dphijj: [-.inf, 2.048]                #max Delta phi (jet,jet) 
-  dphijj: [-2.048, 2.048]                #max Delta phi (jet,jet) # asi lo tiene mijail <- REVISAR
-  min_dphi_jetmet: [0.32, .inf]        #min Delta phi(jet, MET)
+  dphijj: [-2.5, 2.5]                #max Delta phi (jet,jet) # asi lo tiene mijail <- REVISAR
   
   neleSignal: 0                       #LEPTON Veto
   nmuSignal: 0                        #LEPTON Veto
   hasBjet: 0                          #B-jet Veto ES EL MISMO QUE EL b miniscula?????
 
-  metTrig: True                       #MET Trigger
-  MET: [220000, .inf]                 #MET Falta ACÁ LOS INCLUIR LOS CASOS PARA ESTE O ESTE OTRO
-
-  LJjet1_timing: [-.inf, 6]           #max caloDPJ1 timing
-  LJjet1_gapRatio: [0.91, .inf]        #min caloDPJ1 gap ratio
-  LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
-  LJjet1_jvt: [-.inf, 0.37]            #max caloDPJ1 JVT
-  
-  # LJjet1_DPJtagger: [0.5, .inf]       #min caloDPJ1 caloDPJtagger
-  LJjet1_DPJtagger: [0.96, .inf]       #min caloDPJ1 caloDPJtagger
-
   LJ1_type: 2                         #Calo-DPJ Selection
 
-
+  metTrig: True                       #MET Trigger
   
+  # MET: [225000, .inf]                 #MET ORIGINAL
+  MET: [160000, .inf]                 #MET CORTE POSIBLE PRESENTAR
+
+  min_dphi_jetmet: [0.4, .inf]        #min Delta phi(jet, MET)
+
+  LJjet1_timing: [-.inf, 4]           #max caloDPJ1 timing
+  LJjet1_gapRatio: [0.9, .inf]        #min caloDPJ1 gap ratio
+  LJjet1_BIBtagger: [0.2, .inf]       #min caloDPJ1 BIB tagger
+  LJjet1_jvt: [-.inf, 0.4]            #max caloDPJ1 JVT
+  
+  LJjet1_DPJtagger: [0.5, .inf]       #min caloDPJ1 caloDPJtagger
 
   # LJjet1_DPJtagger: [0.9, 1]          #ABCD SR calo DPJ1 caloDPJtagger
-  LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
-
-  # compuestas
-  # 
+  # LJjet1_isoID: [-.inf, 2000]         #ABCD SR caloDPJ1 isoID
 
 
 scale_variable:

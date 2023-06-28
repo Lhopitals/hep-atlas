@@ -59,22 +59,19 @@ if __name__ == '__main__':
     ########################################################
 
     # pruebo como funcionan los cortes
-    test_cuts(df_all, cuts, scales)
+    # test_cuts(df_all, cuts, scales)
 
     # hago los cortes definitivos
-
     df_all_cut = do_cuts(df_all, cuts, scales)
-
-    #df_bk = calc_bk_rejection(df_all_cut)
-    #print(df_bk.shape)
-
-    variable = "dphijj"
 
     ########################################################
     ####################### GRÁFICOS #######################
     ########################################################
 
-    graficar(df_all_cut, variable, 
+    # ELIJO LA VARIABLE A GRAFICAR
+    variable = "min_dphi_jetmet"
+
+    graficar(df_all_cut, variable, derecha=False,
              graficar_significancia = True, 
              graficar_eficiencia = True, 
              aplicar_weights = True)
