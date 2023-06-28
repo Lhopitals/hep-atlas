@@ -56,12 +56,12 @@ cuts:
 
   hasBjet: 0                          #B-jet Veto
   metTrig: True                       #MET Trigger
-  MET: [100000, .inf]                 #MET  
+  MET: [150000, .inf]                 #MET  
 
-  #LJ1_type: 0                         #Mu-DPJ Selection
+  LJ1_type: 0                         #Mu-DPJ Selection
 
-  #LJmu1_isGood: 1                     #muDPJ quality cuts
-  #LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
+  LJmu1_isGood: 1                     #muDPJ quality cuts
+  LJmu1_centrality: [0.7, .inf]       #min muDPJ1 Centrality   CON QCD Y TOP SOLAMENTE ELIMINA EL BACKGROUND
   
   # LJmu1_charge: 0                    #ABCD SR:  mu DPJ1Charge    ACÁ DAN LOS PESOS NEGATIVOS
   # LJjet1_isoID: [0, 2000]             #ABCD ST: muDPJ1 isoID
@@ -84,7 +84,7 @@ scale_variable:
   MET: 0.001
   #LJmu1_mu1DNNscore: 1
   LJmu1_isGood: 1
-  LJmu1_centrality: 1
+  #LJmu1_centrality: 1
   # LJjet1_charge: 1  
   # LJjet1_isoID: 0.001
   
